@@ -1,0 +1,45 @@
+{
+    "format_version": 2,
+    "header": {
+        "name": "Custom Audio Mod",
+        "description": "Adds a new block that plays Audio configured via a UI, with controls for looping and powered via redstone.",
+        "uuid": "b1c75210-ad13-4f60-afc4-3fd52360bf5c",
+        "version": [1, 0, 0],
+        "min_engine_version": [1, 21, 0]
+    },
+    "metadata": {
+        "authors": ["Pete9xi"],
+        "license": "GPLv3",
+        "url": "https://github.com/Pete9xi/Custom-Audio-Mod"
+    },
+    "modules": [
+        {
+            "type": "data",
+            "uuid": "5024dafe-29bc-4b96-bce8-44120dc270d1",
+            "version": [1, 0, 0]
+        },
+        {
+            "description": "A custom audio mod for bedrock edition",
+            "language": "javascript",
+            "type": "script",
+            "uuid": "091441bd-c4ff-4cbf-b721-395d3a0d6532",
+            "version": [0, 0, 1],
+            "entry": "scripts/customAudio.js"
+        }
+    ],
+    "dependencies": [
+        {
+            "uuid": "6f1be613-2e47-d451-205e-5196af1168f5",
+            "version": [1, 0, 0]
+        },
+        {
+            "module_name": "@minecraft/server",
+            "version": "1.17.0-beta"
+        },
+        {
+            "module_name": "@minecraft/server-ui",
+            "version": "1.4.0-beta"
+        }
+    ],
+    "capabilities": ["script_eval"]
+}

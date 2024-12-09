@@ -1,0 +1,78 @@
+{
+	"format_version": "1.21.50",
+	"minecraft:block": {
+		"description": {
+			"identifier": "rb:recordbox",
+			"menu_category": {
+				"category": "items",
+				"group": "itemGroup.name.record"
+			},
+			"traits": {
+				"minecraft:placement_direction": {
+					"enabled_states": ["minecraft:cardinal_direction"]
+				}
+			}
+		},
+		"components": {
+			"minecraft:collision_box": true,
+			"minecraft:selection_box": true,
+			"minecraft:destructible_by_mining": {
+				"seconds_to_destroy": 1
+			},
+			"minecraft:destructible_by_explosion": {
+				"explosion_resistance": 30
+			},
+			"minecraft:geometry": "geometry.recordbox",
+			"minecraft:material_instances": {
+				"*": {
+					"texture": "recordbox",
+					"render_method": "alpha_test"
+				}
+			},
+			"minecraft:map_color": "#7d7d7d",
+			"minecraft:custom_components": ["rb:on_interact","rb:onTick","rb:onPlayerDestroy"], // Adds our custom on_interact component
+			"minecraft:redstone_conductivity": {
+			"redstone_conductor": true,
+			"allows_wire_to_step_down": true
+		},
+		"minecraft:tick": {
+		"interval_range": [0, 0],
+		"looping": true
+		}
+		},
+		"permutations": [
+			{
+				"condition": "q.block_state('minecraft:cardinal_direction') == 'north' ",
+				"components": {
+					"minecraft:transformation": {
+						"rotation": [0, 180, 0]
+					}
+				}
+			},
+			{
+				"condition": "q.block_state('minecraft:cardinal_direction') == 'south' ",
+				"components": {
+					"minecraft:transformation": {
+						"rotation": [0, 0, 0]
+					}
+				}
+			},
+			{
+				"condition": "q.block_state('minecraft:cardinal_direction') == 'east' ",
+				"components": {
+					"minecraft:transformation": {
+						"rotation": [0, 90, 0]
+					}
+				}
+			},
+			{
+				"condition": "q.block_state('minecraft:cardinal_direction') == 'west' ",
+				"components": {
+					"minecraft:transformation": {
+						"rotation": [0, 270, 0]
+					}
+				}
+			}
+		]
+	}
+}

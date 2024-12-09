@@ -1,0 +1,25 @@
+{
+	"format_version": 2,
+	"header": {
+		"name": "Custom Audio Mod",
+		"description": "Adds a new block that plays Audio configured via a UI, with controls for looping and powered via redstone.",
+		"uuid": "6f1be613-2e47-d451-205e-5196af1168f5",
+		"version": [1, 0, 2],
+		"min_engine_version": [1, 16, 0]
+	},
+	"metadata": {
+        "authors": [
+            "Pete9xi"
+        ],
+        "license": "GPLv3",
+        "url": "https://github.com/Pete9xi/Paradox_AntiCheat"
+    },
+	"modules": [
+		{
+			"description": "RecordBox",
+			"type": "resources",
+			"uuid": "4507c734-87a6-9071-6c06-dd2647c034ea",
+			"version": [1, 0, 0]
+		}
+	]
+}

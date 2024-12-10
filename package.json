@@ -1,8 +1,8 @@
 {
-    "name": "RecordBox",
+    "name": "Block Beats",
     "version": "1.0.0",
-    "productName": "RecordBox",
-    "description": "Custom Record Player",
+    "productName": "Block Beats",
+    "description": "Block Beats is an innovative Minecraft Bedrock Edition mod that enables players to bring custom audio into their worlds using redstone mechanics.",
     "private": true,
     "devDependencies": {
         "@types/fs-extra": "11.0.4",

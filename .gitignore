@@ -1,4 +1,3 @@
-scripts/
 types/
 build/
 # Ignore the main node_modules directory

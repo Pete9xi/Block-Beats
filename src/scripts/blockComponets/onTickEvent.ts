@@ -50,15 +50,16 @@ export class redstoneComp {
                 blockState.isPlaying = true;
                 blockState.startTime = currentTime;
                 blockState.trackLength = trackLength;
-
-                world.sendMessage(`Started playing ${fileNameAsString} at ${pos}`);
+                if(debugEnabled){
+                    console.log(`Block Beats [DEBUG]: Started playing ${fileNameAsString} at ${pos}`);
+                }
             } else {
                 // Check if the track has completed
                 const elapsedTime = (currentTime - blockState.startTime) / 1000; // Convert to seconds
                 if(debugEnabled){
-                console.log("[DEBUG]: elapsedTime: " + elapsedTime);
-                console.log("[DEBUG]: currentTime: " + currentTime);
-                console.log("[DEBUG]: trackLenght: " + trackLength);
+                console.log("Block Beats [DEBUG]: elapsedTime: " + elapsedTime);
+                console.log("Block Beats [DEBUG]: currentTime: " + currentTime);
+                console.log("Block Beats [DEBUG]: trackLenght: " + trackLength);
                 }
                 if (elapsedTime >= blockState.trackLength) {
                     const worldSoundOptions = {
@@ -69,7 +70,7 @@ export class redstoneComp {
                     world.playSound(fileNameAsString, block.location, worldSoundOptions);
                     blockState.startTime = currentTime; // Restart the track
                     if(debugEnabled) {
-                        console.log("[DEBUG]: Looping " + fileNameAsString + " at " + pos);
+                        console.log("Block Beats [DEBUG]: Looping " + fileNameAsString + " at " + pos);
                     }
                   
                 }
@@ -79,8 +80,9 @@ export class redstoneComp {
             world.getDimension("overworld").runCommandAsync(stopCommand);
 
             blockState.isPlaying = false;
-
-            world.sendMessage(`Stopped playing sound at ${pos}`);
+            if(debugEnabled){
+                console.log(`Block Beats [DEBUG]: Stopped playing sound at ${pos}`);
+            }
         }
     }
 }

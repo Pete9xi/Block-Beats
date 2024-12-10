@@ -12,8 +12,8 @@ export class recordBoxBreak {
             // Dynamic property doesn't exist so no need to do anything
         } else{
             if(debugEnabled){
-                console.log("[DEBUG]: Deleting DynamicProperty " + "cab" + blockLocationAsString );
-                console.log("[DEBUG]: Deleting DynamicProperty " + "cabLength" + blockLocationAsString );
+                console.log("Block Beats [DEBUG]: Deleting DynamicProperty " + "cab" + blockLocationAsString );
+                console.log("Block Beats [DEBUG]: Deleting DynamicProperty " + "cabLength" + blockLocationAsString );
             }
             world.setDynamicProperty("cab" + blockLocationAsString, undefined);
             world.setDynamicProperty("cabLength" + blockLocationAsString, undefined);

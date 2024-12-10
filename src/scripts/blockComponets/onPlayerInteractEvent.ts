@@ -12,7 +12,7 @@ export class recordBox {
         if (testforDynamicProp === undefined) {
             // Dynamic property doesn't exist so lets get the block setup and show the player a UI
             const configUI = new ModalFormData();
-            configUI.title("§rCustom Audio - Block Config");
+            configUI.title("§rBlock Beats - Block Config");
             configUI.textField("FileName", "");
             configUI.textField("Track Length", "");
 			configUI.toggle("Loop?", false);
@@ -39,7 +39,7 @@ export class recordBox {
 			if(trackLengthProp === undefined){
 			currentLoopingValue = false;
 			}
-            configUI.title("§rCustom Audio - Block Config");
+            configUI.title("§rBlock Beats - Block Config");
             configUI.textField("FileName", testforDynamicProp.toString());
 			configUI.textField("Track Lenght", trackLengthProp.toString());
 			configUI.toggle("Loop?", currentLoopingValue); 

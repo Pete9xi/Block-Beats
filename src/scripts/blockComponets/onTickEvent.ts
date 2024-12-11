@@ -29,8 +29,8 @@ export class redstoneComp {
         const blockState = this.blockStates.get(pos)!;
 
         // Retrieve dynamic properties
-        const fileNameProp = world.getDynamicProperty("cab" + blockLocationAsString);
-        const trackLengthProp = world.getDynamicProperty("cabLength" + blockLocationAsString);
+        const fileNameProp = world.getDynamicProperty("bb" + blockLocationAsString);
+        const trackLengthProp = world.getDynamicProperty("bbLength" + blockLocationAsString);
 
         if (!fileNameProp || !trackLengthProp) return; // Ensure properties exist
 

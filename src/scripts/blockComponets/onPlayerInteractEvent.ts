@@ -1,5 +1,6 @@
 import { BlockComponentPlayerInteractEvent, ItemStack, world } from "@minecraft/server";
 import { ModalFormData, ModalFormResponse } from "@minecraft/server-ui";
+import { debugEnabled } from "../debug/debug";
 export class recordBox {
     constructor() {
         this.onPlayerInteract = this.onPlayerInteract.bind(this);
@@ -21,16 +22,26 @@ export class recordBox {
             configUI.textField("FileName", "");
             configUI.textField("Track Length", "");
 			configUI.toggle("Loop?", false);
+            configUI.slider("Pitch",-10,10,1,1);
+            configUI.slider("Volume",1,100,1,1);
             configUI
             .show(player)
             .then((formData: ModalFormResponse) => {
               const fileName = formData.formValues[0];
               const trackLength = formData.formValues[1];
               const isLooping = formData.formValues[2];
+              const pitch = formData.formValues[3];
+              const volume = formData.formValues[4];
               if(isLooping === true){
                 world.setDynamicProperty("cabLength" + blockLocationAsString, trackLength.toString());
               }
               world.setDynamicProperty("cab" + blockLocationAsString, fileName.toString());
+              if(debugEnabled){
+                console.log("Block Beats [DEBUG]: fileName: " + fileName);
+                console.log("Block Beats [DEBUG]: trackLength: " + trackLength);
+                console.log("Block Beats [DEBUG]: pitch: " + pitch);
+                console.log("Block Beats [DEBUG]: volume: " + volume);
+            }
             })
             .catch((error: Error) => {
               console.log("Failed to show form: " + error);
@@ -47,13 +58,15 @@ export class recordBox {
                 }else{
                     //The block should be locked so lets unlock it!
                     world.setDynamicProperty("cabLock" + blockLocationAsString, undefined);
+                    player.sendMessage(`§9Block Beats:§r This block has been unlocked. `);
+                    return;
                 }
 
             }
             //Lets allow the player to activate the block by hand but for the time being we will advise on it being locked.
             
             if(testforLockDynamicProp === "locked"){
-                player.sendMessage(`§9Block Beats:§r This Block is Currently Locked. `);
+                player.sendMessage(`§9Block Beats:§r This block is currently locked. `);
                 return;
             }
             //Lets allow the player to edit the current set data.
@@ -66,17 +79,30 @@ export class recordBox {
             configUI.title("§9Block Beats - Block Config");
             configUI.textField("FileName", testforDynamicProp.toString());
 			configUI.textField("Track Lenght", trackLengthProp.toString());
-			configUI.toggle("Loop?", currentLoopingValue); 
+			configUI.toggle("Loop?", currentLoopingValue);
+            configUI.slider("Pitch",-10,10,1,1);
+            configUI.slider("Volume",1,100,1,1); 
             configUI
                 .show(player)
                 .then((formData) => {
                 const fileName = formData.formValues[0];
                 const trackLength = formData.formValues[1];
                 const isLooping = formData.formValues[2];
+                const pitch = formData.formValues[3];
+                const volume = formData.formValues[4];
+
                 if (isLooping === true) {
                     world.setDynamicProperty("cabLength" + blockLocationAsString, trackLength.toString());
                 }
+                
                 world.setDynamicProperty("cab" + blockLocationAsString, fileName.toString());
+                if(debugEnabled){
+                    console.log("Block Beats [DEBUG]: fileName: " + fileName);
+                    console.log("Block Beats [DEBUG]: trackLength: " + trackLength);
+                    console.log("Block Beats [DEBUG]: pitch: " + pitch);
+                    console.log("Block Beats [DEBUG]: volume: " + volume);
+                }
+            
             })
                 .catch((error) => {
                 console.log("Failed to show form: " + error);

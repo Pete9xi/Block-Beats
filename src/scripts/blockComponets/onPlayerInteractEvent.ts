@@ -14,7 +14,7 @@ export class recordBox {
 
         const blockLocationAsString = e.block.x.toString() + e.block.y.toString() + e.block.z.toString()
         //use the blocks location as a key.
-        const testforDynamicProp = world.getDynamicProperty("cab" + blockLocationAsString)
+        const testforDynamicProp = world.getDynamicProperty("bb" + blockLocationAsString)
         if (testforDynamicProp === undefined) {
             // Dynamic property doesn't exist so lets get the block setup and show the player a UI
             const configUI = new ModalFormData();
@@ -33,9 +33,9 @@ export class recordBox {
               const pitch = formData.formValues[3];
               const volume = formData.formValues[4];
               if(isLooping === true){
-                world.setDynamicProperty("cabLength" + blockLocationAsString, trackLength.toString());
+                world.setDynamicProperty("bbLength" + blockLocationAsString, trackLength.toString());
               }
-              world.setDynamicProperty("cab" + blockLocationAsString, fileName.toString());
+              world.setDynamicProperty("bb" + blockLocationAsString, fileName.toString());
               if(debugEnabled){
                 console.log("Block Beats [DEBUG]: fileName: " + fileName);
                 console.log("Block Beats [DEBUG]: trackLength: " + trackLength);
@@ -48,16 +48,16 @@ export class recordBox {
               return -1;
             });
         } else{
-            const testforLockDynamicProp = world.getDynamicProperty("cabLock" + blockLocationAsString);
+            const testforLockDynamicProp = world.getDynamicProperty("bbLock" + blockLocationAsString);
             //Check to see if the player is holding a stick if so we can then lock the block so it can be activated by hand.
             if(mainHandItem.typeId =="minecraft:stick"){
                 if(testforLockDynamicProp === undefined){
                     //we need to create it, this means the block should not be locked, lets lock it
-                    world.setDynamicProperty("cabLock" + blockLocationAsString,"locked");
+                    world.setDynamicProperty("bbLock" + blockLocationAsString,"locked");
                     return;
                 }else{
                     //The block should be locked so lets unlock it!
-                    world.setDynamicProperty("cabLock" + blockLocationAsString, undefined);
+                    world.setDynamicProperty("bbLock" + blockLocationAsString, undefined);
                     player.sendMessage(`§9Block Beats:§r This block has been unlocked. `);
                     return;
                 }
@@ -71,7 +71,7 @@ export class recordBox {
             }
             //Lets allow the player to edit the current set data.
             const configUI = new ModalFormData();
-			const trackLengthProp = world.getDynamicProperty("cabLength" + blockLocationAsString);
+			const trackLengthProp = world.getDynamicProperty("bbLength" + blockLocationAsString);
 			let currentLoopingValue = true;
 			if(trackLengthProp === undefined){
 			currentLoopingValue = false;
@@ -92,10 +92,10 @@ export class recordBox {
                 const volume = formData.formValues[4];
 
                 if (isLooping === true) {
-                    world.setDynamicProperty("cabLength" + blockLocationAsString, trackLength.toString());
+                    world.setDynamicProperty("bbLength" + blockLocationAsString, trackLength.toString());
                 }
                 
-                world.setDynamicProperty("cab" + blockLocationAsString, fileName.toString());
+                world.setDynamicProperty("bb" + blockLocationAsString, fileName.toString());
                 if(debugEnabled){
                     console.log("Block Beats [DEBUG]: fileName: " + fileName);
                     console.log("Block Beats [DEBUG]: trackLength: " + trackLength);

@@ -22,8 +22,8 @@ export class recordBox {
             configUI.textField("FileName", "");
             configUI.textField("Track Length", "");
 			configUI.toggle("Loop?", false);
-            configUI.slider("Pitch",-10,10,1,1);
-            configUI.slider("Volume",1,100,1,1);
+            configUI.slider("Pitch", 0.1, 2.0, 0.1, 1.0);
+            configUI.slider("Volume", 0.01, 1.0, 0.01, 1.0);
             configUI
             .show(player)
             .then((formData: ModalFormResponse) => {
@@ -34,6 +34,8 @@ export class recordBox {
               const volume = formData.formValues[4];
               if(isLooping === true){
                 world.setDynamicProperty("bbLength" + blockLocationAsString, trackLength.toString());
+                world.setDynamicProperty("bbPitch" + blockLocationAsString, pitch);
+                world.setDynamicProperty("bbVolume" + blockLocationAsString, volume);
               }
               world.setDynamicProperty("bb" + blockLocationAsString, fileName.toString());
               if(debugEnabled){
@@ -72,6 +74,8 @@ export class recordBox {
             //Lets allow the player to edit the current set data.
             const configUI = new ModalFormData();
 			const trackLengthProp = world.getDynamicProperty("bbLength" + blockLocationAsString);
+            const pitchProp = world.getDynamicProperty("bbPitch" + blockLocationAsString);
+            const volProp = world.getDynamicProperty("bbPitch" + blockLocationAsString);
 			let currentLoopingValue = true;
 			if(trackLengthProp === undefined){
 			currentLoopingValue = false;
@@ -80,8 +84,8 @@ export class recordBox {
             configUI.textField("FileName", testforDynamicProp.toString());
 			configUI.textField("Track Lenght", trackLengthProp.toString());
 			configUI.toggle("Loop?", currentLoopingValue);
-            configUI.slider("Pitch",-10,10,1,1);
-            configUI.slider("Volume",1,100,1,1); 
+            configUI.slider("Pitch",0.1, 2.0, 0.1, Number(pitchProp));
+            configUI.slider("Volume", 0.01, 1.0, 0.01, Number(volProp));
             configUI
                 .show(player)
                 .then((formData) => {
@@ -96,6 +100,8 @@ export class recordBox {
                 }
                 
                 world.setDynamicProperty("bb" + blockLocationAsString, fileName.toString());
+                world.setDynamicProperty("bbPitch" + blockLocationAsString, pitch);
+                world.setDynamicProperty("bbVolume" + blockLocationAsString, volume);
                 if(debugEnabled){
                     console.log("Block Beats [DEBUG]: fileName: " + fileName);
                     console.log("Block Beats [DEBUG]: trackLength: " + trackLength);

@@ -14,9 +14,13 @@ export class recordBoxBreak {
             if(debugEnabled){
                 console.log("Block Beats [DEBUG]: Deleting DynamicProperty " + "bb" + blockLocationAsString );
                 console.log("Block Beats [DEBUG]: Deleting DynamicProperty " + "bbLength" + blockLocationAsString );
+                console.log("Block Beats [DEBUG]: Deleting DynamicProperty " + "bbPitch" + blockLocationAsString );
+                console.log("Block Beats [DEBUG]: Deleting DynamicProperty " + "bbVolume" + blockLocationAsString );
             }
             world.setDynamicProperty("bb" + blockLocationAsString, undefined);
             world.setDynamicProperty("bbLength" + blockLocationAsString, undefined);
+            world.setDynamicProperty("bbPitch" + blockLocationAsString, undefined);
+                world.setDynamicProperty("bbVolume" + blockLocationAsString, undefined);
         }
     }    
 }

@@ -31,6 +31,8 @@ export class redstoneComp {
         // Retrieve dynamic properties
         const fileNameProp = world.getDynamicProperty("bb" + blockLocationAsString);
         const trackLengthProp = world.getDynamicProperty("bbLength" + blockLocationAsString);
+        const worldSoundOptionsPitch = world.getDynamicProperty("bbPitch" + blockLocationAsString);
+        const worldSoundOptionsVolume = world.getDynamicProperty("bbVolume" + blockLocationAsString);
 
         if (!fileNameProp || !trackLengthProp) return; // Ensure properties exist
 
@@ -42,8 +44,8 @@ export class redstoneComp {
         if (isPowered === 15) {
             if (!blockState.isPlaying) {
                 const worldSoundOptions = {
-                    pitch: 1.0,
-                    volume: 1.0,
+                    pitch: Number(worldSoundOptionsPitch),
+                    volume: Number(worldSoundOptionsVolume),
                 };
 
                 world.playSound(fileNameAsString, block.location, worldSoundOptions);
@@ -63,8 +65,8 @@ export class redstoneComp {
                 }
                 if (elapsedTime >= blockState.trackLength) {
                     const worldSoundOptions = {
-                        pitch: 1.0,
-                        volume: 1.0,
+                        pitch: Number(worldSoundOptionsPitch),
+                        volume: Number(worldSoundOptionsVolume),
                     };
 
                     world.playSound(fileNameAsString, block.location, worldSoundOptions);

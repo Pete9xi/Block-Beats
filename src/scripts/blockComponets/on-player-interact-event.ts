@@ -34,7 +34,7 @@ export class RecordBox {
      * @returns A promise resolving after the UI interaction.
      */
     private static async showConfigUI(player: Player, blockLocationKey: number, defaultValues: any = {}): Promise<void> {
-        const { fileName = "", trackLength = "", isLooping = false, pitch = 1.0, volume = 1.0 } = defaultValues;
+        const { fileName = "", trackLength = "", isLooping = false, pitch = 1.0, volume = 50.0 } = defaultValues;
 
         const configUI = new ModalFormData()
             .title("§9Block Beats - Block Config")
@@ -42,7 +42,7 @@ export class RecordBox {
             .textField("Track Length", trackLength, trackLength)
             .toggle("Loop?", isLooping)
             .slider("Pitch", 0.1, 2.0, 0.1, pitch)
-            .slider("Volume", 0.01, 1.0, 0.01, volume);
+            .slider("Audio Load Distance", 0.01, 100.0, 50.0, volume);
 
         try {
             const formData: ModalFormResponse = await configUI.show(player);

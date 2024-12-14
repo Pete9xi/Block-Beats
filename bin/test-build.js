@@ -135,10 +135,12 @@ async function checkAndBuild() {
         process.exit(1); // Abort immediately if any command fails
     }
 
-    // Copy the build contents to both BeatBox directories
+    // Copy the build contents to BeatBox behavior pack directory
     const buildDir = "build";
     fse.copySync(buildDir, beatBoxBehaviorDir);
-    fse.copySync(buildDir, beatBoxResourceDir);
+    // Copy resource pack files to the BeatBox resource pack directory
+    const buildResourceDir = path.join(`./`, "BlockBeats_RP");
+    fse.copySync(buildResourceDir, beatBoxResourceDir);
 
     console.log(`> Copied build contents to '${beatBoxBehaviorDir}' and '${beatBoxResourceDir}'...\n`);
 
@@ -162,7 +164,7 @@ async function checkAndBuild() {
 
         // If there's a manifest.json for resource packs, handle it similarly
         const resourceManifestPath = path.join(beatBoxResourceDir, "manifest.json");
-        console.log(resourceManifestPath)
+        console.log(resourceManifestPath);
         if (fs.existsSync(resourceManifestPath)) {
             const resourceManifest = JSON.parse(fs.readFileSync(resourceManifestPath, "utf8"));
 

@@ -153,7 +153,7 @@ function cleanUp(addonDir) {
         copyScriptsAndBlocks(behaviorPacksDir);
 
         // Prepare output file path
-        const outputFileName = `BeatBox-v${packageVersion}.${process.argv.includes("--mcpack") ? "mcaddon" : "zip"}`;
+        const outputFileName = `BlockBeats-v${packageVersion}.${process.argv.includes("--mcpack") ? "mcaddon" : "zip"}`;
         const outputFilePath = path.resolve("build/build", outputFileName);
 
         // Create the distribution archive

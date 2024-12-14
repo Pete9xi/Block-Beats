@@ -1,27 +1,37 @@
-import {  world, BlockComponentPlayerDestroyEvent} from "@minecraft/server";
+import { world, BlockComponentPlayerDestroyEvent } from "@minecraft/server";
 import { debugEnabled } from "../debug/debug";
-export class recordBoxBreak {
+
+export class RecordBoxBreak {
+    private static getDynamicPropertyKey(location: { x: number; y: number; z: number }): string {
+        return `bb${location.x}${location.y}${location.z}`;
+    }
+
+    private static deleteDynamicProperties(location: { x: number; y: number; z: number }): void {
+        const locationKey = RecordBoxBreak.getDynamicPropertyKey(location);
+
+        if (debugEnabled) {
+            console.log(`Block Beats [DEBUG]: Deleting DynamicProperty ${locationKey}`);
+            console.log(`Block Beats [DEBUG]: Deleting DynamicProperty bbLength${locationKey}`);
+            console.log(`Block Beats [DEBUG]: Deleting DynamicProperty bbPitch${locationKey}`);
+            console.log(`Block Beats [DEBUG]: Deleting DynamicProperty bbVolume${locationKey}`);
+        }
+
+        world.setDynamicProperty(locationKey, undefined);
+        world.setDynamicProperty(`bbLength${locationKey}`, undefined);
+        world.setDynamicProperty(`bbPitch${locationKey}`, undefined);
+        world.setDynamicProperty(`bbVolume${locationKey}`, undefined);
+    }
+
     constructor() {
         this.onPlayerDestroy = this.onPlayerDestroy.bind(this);
     }
-    onPlayerDestroy(e: BlockComponentPlayerDestroyEvent) {
-        const blockLocationAsString = e.block.x.toString() + e.block.y.toString() + e.block.z.toString()
-        //use the blocks location as a key.
-        const testforDynamicProp = world.getDynamicProperty("bb" + blockLocationAsString)
-        if (testforDynamicProp === undefined) {
-            // Dynamic property doesn't exist so no need to do anything
-        } else{
-            if(debugEnabled){
-                console.log("Block Beats [DEBUG]: Deleting DynamicProperty " + "bb" + blockLocationAsString );
-                console.log("Block Beats [DEBUG]: Deleting DynamicProperty " + "bbLength" + blockLocationAsString );
-                console.log("Block Beats [DEBUG]: Deleting DynamicProperty " + "bbPitch" + blockLocationAsString );
-                console.log("Block Beats [DEBUG]: Deleting DynamicProperty " + "bbVolume" + blockLocationAsString );
-            }
-            world.setDynamicProperty("bb" + blockLocationAsString, undefined);
-            world.setDynamicProperty("bbLength" + blockLocationAsString, undefined);
-            world.setDynamicProperty("bbPitch" + blockLocationAsString, undefined);
-                world.setDynamicProperty("bbVolume" + blockLocationAsString, undefined);
-        }
-    }    
-}
 
+    onPlayerDestroy(event: BlockComponentPlayerDestroyEvent): void {
+        const { x, y, z } = event.block;
+        const locationKey = RecordBoxBreak.getDynamicPropertyKey({ x, y, z });
+
+        if (world.getDynamicProperty(locationKey) !== undefined) {
+            RecordBoxBreak.deleteDynamicProperties({ x, y, z });
+        }
+    }
+}

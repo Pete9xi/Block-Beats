@@ -1,1 +1,1 @@
-export const debugEnabled : boolean = false
+export const debugEnabled: boolean = false;

@@ -1,120 +1,111 @@
-import { BlockComponentPlayerInteractEvent, ItemStack, world } from "@minecraft/server";
+import { BlockComponentPlayerInteractEvent, EntityEquippableComponent, EquipmentSlot, ItemStack, Player, world } from "@minecraft/server";
 import { ModalFormData, ModalFormResponse } from "@minecraft/server-ui";
 import { debugEnabled } from "../debug/debug";
-export class recordBox {
+
+export class RecordBox {
+    private static getBlockLocationKey(x: number, y: number, z: number): string {
+        return `${x}${y}${z}`;
+    }
+
+    private static async showConfigUI(player: Player, blockLocationKey: string, defaultValues: any = {}): Promise<void> {
+        const { fileName = "", trackLength = "", isLooping = false, pitch = 1.0, volume = 1.0 } = defaultValues;
+
+        const configUI = new ModalFormData()
+            .title("§9Block Beats - Block Config")
+            .textField("FileName", fileName)
+            .textField("Track Length", trackLength)
+            .toggle("Loop?", isLooping)
+            .slider("Pitch", 0.1, 2.0, 0.1, pitch)
+            .slider("Volume", 0.01, 1.0, 0.01, volume);
+
+        try {
+            const formData: ModalFormResponse = await configUI.show(player);
+            if (formData.cancelationReason === "UserClosed") return;
+            const [newFileName, newTrackLength, newIsLooping, newPitch, newVolume] = formData.formValues;
+
+            if (newIsLooping) {
+                world.setDynamicProperty(`bbLength${blockLocationKey}`, newTrackLength.toString());
+            }
+            world.setDynamicProperty(`bb${blockLocationKey}`, newFileName.toString());
+            world.setDynamicProperty(`bbPitch${blockLocationKey}`, newPitch);
+            world.setDynamicProperty(`bbVolume${blockLocationKey}`, newVolume);
+
+            if (debugEnabled) {
+                console.log(`Block Beats [DEBUG]: fileName: ${newFileName}`);
+                console.log(`Block Beats [DEBUG]: trackLength: ${newTrackLength}`);
+                console.log(`Block Beats [DEBUG]: pitch: ${newPitch}`);
+                console.log(`Block Beats [DEBUG]: volume: ${newVolume}`);
+            }
+        } catch (error) {
+            console.log("Failed to show form:", error);
+        }
+    }
+
     constructor() {
         this.onPlayerInteract = this.onPlayerInteract.bind(this);
     }
-    onPlayerInteract(e: BlockComponentPlayerInteractEvent) {
-        const { player } = e;
-        //@ts-ignore seems to be an issue with the types EntityEquippableComponent
-        const playerequipComp: EntityEquippableComponent = player.getComponent("minecraft:equippable");
-        const mainHandItem: ItemStack = playerequipComp.getEquipment("Mainhand")
-        
 
-        const blockLocationAsString = e.block.x.toString() + e.block.y.toString() + e.block.z.toString()
-        //use the blocks location as a key.
-        const testforDynamicProp = world.getDynamicProperty("bb" + blockLocationAsString)
-        if (testforDynamicProp === undefined) {
-            // Dynamic property doesn't exist so lets get the block setup and show the player a UI
-            const configUI = new ModalFormData();
-            configUI.title("§9Block Beats - Block Config");
-            configUI.textField("FileName", "");
-            configUI.textField("Track Length", "");
-			configUI.toggle("Loop?", false);
-            configUI.slider("Pitch", 0.1, 2.0, 0.1, 1.0);
-            configUI.slider("Volume", 0.01, 1.0, 0.01, 1.0);
-            configUI
-            .show(player)
-            .then((formData: ModalFormResponse) => {
-              const fileName = formData.formValues[0];
-              const trackLength = formData.formValues[1];
-              const isLooping = formData.formValues[2];
-              const pitch = formData.formValues[3];
-              const volume = formData.formValues[4];
-              if(isLooping === true){
-                world.setDynamicProperty("bbLength" + blockLocationAsString, trackLength.toString());
-                world.setDynamicProperty("bbPitch" + blockLocationAsString, pitch);
-                world.setDynamicProperty("bbVolume" + blockLocationAsString, volume);
-              }
-              world.setDynamicProperty("bb" + blockLocationAsString, fileName.toString());
-              if(debugEnabled){
-                console.log("Block Beats [DEBUG]: fileName: " + fileName);
-                console.log("Block Beats [DEBUG]: trackLength: " + trackLength);
-                console.log("Block Beats [DEBUG]: pitch: " + pitch);
-                console.log("Block Beats [DEBUG]: volume: " + volume);
+    async onPlayerInteract(e: BlockComponentPlayerInteractEvent): Promise<void> {
+        const { player, block } = e;
+        const blockLocationKey = RecordBox.getBlockLocationKey(block.x, block.y, block.z);
+        const playerEquipComp = player.getComponent("minecraft:equippable") as EntityEquippableComponent;
+        const mainHandItem: ItemStack = playerEquipComp.getEquipment("Mainhand" as EquipmentSlot);
+
+        // Attempt to fetch existing dynamic properties
+        const dynamicProp = world.getDynamicProperty(`bb${blockLocationKey}`);
+
+        if (dynamicProp === undefined) {
+            // Try to reinstate block state if previous properties exist
+            const fileName = world.getDynamicProperty(`bb${blockLocationKey}`);
+            const trackLength = world.getDynamicProperty(`bbLength${blockLocationKey}`);
+            const pitch = world.getDynamicProperty(`bbPitch${blockLocationKey}`);
+            const volume = world.getDynamicProperty(`bbVolume${blockLocationKey}`);
+
+            if (fileName && trackLength && pitch !== undefined && volume !== undefined) {
+                // Rebuild the block configuration from properties
+                await RecordBox.showConfigUI(player, blockLocationKey, {
+                    fileName: fileName.toString(),
+                    trackLength: trackLength.toString(),
+                    pitch: Number(pitch),
+                    volume: Number(volume),
+                });
+            } else {
+                // Properties not found, open configuration UI
+                await RecordBox.showConfigUI(player, blockLocationKey);
             }
-            })
-            .catch((error: Error) => {
-              console.log("Failed to show form: " + error);
-              return -1;
-            });
-        } else{
-            const testforLockDynamicProp = world.getDynamicProperty("bbLock" + blockLocationAsString);
-            //Check to see if the player is holding a stick if so we can then lock the block so it can be activated by hand.
-            if(mainHandItem.typeId =="minecraft:stick"){
-                if(testforLockDynamicProp === undefined){
-                    //we need to create it, this means the block should not be locked, lets lock it
-                    world.setDynamicProperty("bbLock" + blockLocationAsString,"locked");
-                    return;
-                }else{
-                    //The block should be locked so lets unlock it!
-                    world.setDynamicProperty("bbLock" + blockLocationAsString, undefined);
-                    player.sendMessage(`§9Block Beats:§r This block has been unlocked. `);
-                    return;
+        } else {
+            const lockProp = world.getDynamicProperty(`bbLock${blockLocationKey}`);
+
+            if (mainHandItem.typeId === "minecraft:stick") {
+                if (lockProp === undefined) {
+                    // Lock the block
+                    world.setDynamicProperty(`bbLock${blockLocationKey}`, "locked");
+                } else {
+                    // Unlock the block
+                    world.setDynamicProperty(`bbLock${blockLocationKey}`, undefined);
+                    player.sendMessage(`§9Block Beats:§r This block has been unlocked.`);
                 }
-
-            }
-            //Lets allow the player to activate the block by hand but for the time being we will advise on it being locked.
-            
-            if(testforLockDynamicProp === "locked"){
-                player.sendMessage(`§9Block Beats:§r This block is currently locked. `);
                 return;
             }
-            //Lets allow the player to edit the current set data.
-            const configUI = new ModalFormData();
-			const trackLengthProp = world.getDynamicProperty("bbLength" + blockLocationAsString);
-            const pitchProp = world.getDynamicProperty("bbPitch" + blockLocationAsString);
-            const volProp = world.getDynamicProperty("bbPitch" + blockLocationAsString);
-			let currentLoopingValue = true;
-			if(trackLengthProp === undefined){
-			currentLoopingValue = false;
-			}
-            configUI.title("§9Block Beats - Block Config");
-            configUI.textField("FileName", testforDynamicProp.toString());
-			configUI.textField("Track Lenght", trackLengthProp.toString());
-			configUI.toggle("Loop?", currentLoopingValue);
-            configUI.slider("Pitch",0.1, 2.0, 0.1, Number(pitchProp));
-            configUI.slider("Volume", 0.01, 1.0, 0.01, Number(volProp));
-            configUI
-                .show(player)
-                .then((formData) => {
-                const fileName = formData.formValues[0];
-                const trackLength = formData.formValues[1];
-                const isLooping = formData.formValues[2];
-                const pitch = formData.formValues[3];
-                const volume = formData.formValues[4];
 
-                if (isLooping === true) {
-                    world.setDynamicProperty("bbLength" + blockLocationAsString, trackLength.toString());
-                }
-                
-                world.setDynamicProperty("bb" + blockLocationAsString, fileName.toString());
-                world.setDynamicProperty("bbPitch" + blockLocationAsString, pitch);
-                world.setDynamicProperty("bbVolume" + blockLocationAsString, volume);
-                if(debugEnabled){
-                    console.log("Block Beats [DEBUG]: fileName: " + fileName);
-                    console.log("Block Beats [DEBUG]: trackLength: " + trackLength);
-                    console.log("Block Beats [DEBUG]: pitch: " + pitch);
-                    console.log("Block Beats [DEBUG]: volume: " + volume);
-                }
-            
-            })
-                .catch((error) => {
-                console.log("Failed to show form: " + error);
-                return -1;
+            if (lockProp === "locked") {
+                player.sendMessage(`§9Block Beats:§r This block is currently locked.`);
+                return;
+            }
+
+            // Show UI for editing the block's configuration
+            const trackLength = world.getDynamicProperty(`bbLength${blockLocationKey}`) || "";
+            const pitch = world.getDynamicProperty(`bbPitch${blockLocationKey}`) || 1.0;
+            const volume = world.getDynamicProperty(`bbVolume${blockLocationKey}`) || 1.0;
+            const isLooping = trackLength !== "" ? true : false;
+
+            await RecordBox.showConfigUI(player, blockLocationKey, {
+                fileName: dynamicProp.toString(),
+                trackLength: trackLength.toString(),
+                isLooping,
+                pitch,
+                volume,
             });
         }
-    }    
+    }
 }
-

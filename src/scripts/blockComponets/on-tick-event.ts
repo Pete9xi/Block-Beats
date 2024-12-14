@@ -1,89 +1,135 @@
-import { world, BlockComponentTickEvent } from "@minecraft/server";
+import { world, BlockComponentTickEvent, Block } from "@minecraft/server";
 import { debugEnabled } from "../debug/debug";
-export class redstoneComp {
-    blockStates: Map<string, { isPlaying: boolean; startTime: number; trackLength: number }>;
+
+export class RedstoneComp {
+    private blockStates: Map<
+        string,
+        {
+            isPlaying: boolean;
+            startTime: number;
+            trackLength: number;
+            fileName?: string;
+            pitch?: number;
+            volume?: number;
+        }
+    >;
+    private lastCleanup: number;
 
     constructor() {
         this.onTick = this.onTick.bind(this);
         this.blockStates = new Map();
+        this.lastCleanup = Date.now();
     }
 
     // Utility function to parse track length from mm.ss format to total seconds
     private parseTrackLength(input: number): number {
-        const parts = input.toString().split(".");
-        const minutes = parseInt(parts[0] || "0", 10); // Default to 0 if there are no minutes
-        const seconds = parts[1] ? parseInt(parts[1].padEnd(2, "0"), 10) : 0; // Pad to ensure two digits
-        return minutes * 60 + seconds;
-    }   
+        const [minutes = "0", seconds = "00"] = input.toString().split(".");
+        return parseInt(minutes, 10) * 60 + parseInt(seconds.padEnd(2, "0"), 10); // Pad seconds for consistency
+    }
+
+    private getDynamicProperties(blockLocationAsString: string): {
+        fileName: string | undefined;
+        trackLength: number | undefined;
+        pitch: number | undefined;
+        volume: number | undefined;
+    } {
+        const fileNameProp = world.getDynamicProperty("bb" + blockLocationAsString);
+        const trackLengthProp = world.getDynamicProperty("bbLength" + blockLocationAsString);
+        const pitchProp = world.getDynamicProperty("bbPitch" + blockLocationAsString);
+        const volumeProp = world.getDynamicProperty("bbVolume" + blockLocationAsString);
+
+        if (!fileNameProp || !trackLengthProp || pitchProp === undefined || volumeProp === undefined) {
+            return { fileName: undefined, trackLength: undefined, pitch: undefined, volume: undefined };
+        }
+
+        return {
+            fileName: fileNameProp.toString(),
+            trackLength: this.parseTrackLength(Number(trackLengthProp)),
+            pitch: Number(pitchProp),
+            volume: Number(volumeProp),
+        };
+    }
+
+    private playSoundIfNeeded(blockState: { isPlaying: boolean; startTime: number; trackLength: number }, block: Block, fileName: string, trackLength: number, pitch: number, volume: number, currentTime: number): void {
+        if (!blockState.isPlaying) {
+            const soundOptions = { pitch, volume };
+            world.playSound(fileName, block.location, soundOptions);
+            blockState.isPlaying = true;
+            blockState.startTime = currentTime;
+            blockState.trackLength = trackLength;
+            if (debugEnabled) {
+                console.log(`Block Beats [DEBUG]: Started playing ${fileName} at ${block.location.x.toFixed(0)}, ${block.location.y.toFixed(0)}, ${block.location.z.toFixed(0)}`);
+            }
+        } else {
+            const elapsedTime = (currentTime - blockState.startTime) / 1000; // Convert to seconds
+            if (elapsedTime >= blockState.trackLength) {
+                const soundOptions = { pitch, volume };
+                world.playSound(fileName, block.location, soundOptions);
+                blockState.startTime = currentTime; // Restart the track
+                if (debugEnabled) {
+                    console.log(`Block Beats [DEBUG]: Looping ${fileName} at ${block.location.x.toFixed(0)}, ${block.location.y.toFixed(0)}, ${block.location.z.toFixed(0)}`);
+                }
+            }
+        }
+    }
+
+    private stopSoundIfNeeded(blockState: { isPlaying: boolean }, block: Block, fileName: string): void {
+        if (blockState.isPlaying) {
+            const stopCommand = `/stopsound @a ${fileName}`;
+            world.getDimension("overworld").runCommandAsync(stopCommand);
+            blockState.isPlaying = false;
+            if (debugEnabled) {
+                console.log(`Block Beats [DEBUG]: Stopped playing sound at ${block.location.x.toFixed(0)}, ${block.location.y.toFixed(0)}, ${block.location.z.toFixed(0)}`);
+            }
+        }
+    }
 
     onTick(e: BlockComponentTickEvent): void {
         const block = e.block;
-        const pos = `${block.location.x},${block.location.y},${block.location.z}`;
         const blockLocationAsString = `${block.location.x}${block.location.y}${block.location.z}`;
+        const pos = `${block.location.x},${block.location.y},${block.location.z}`;
         const isPowered = block.getRedstonePower();
-
-        if (!this.blockStates.has(pos)) {
-            this.blockStates.set(pos, { isPlaying: false, startTime: 0, trackLength: 0 });
-        }
-
-        const blockState = this.blockStates.get(pos)!;
-
-        // Retrieve dynamic properties
-        const fileNameProp = world.getDynamicProperty("bb" + blockLocationAsString);
-        const trackLengthProp = world.getDynamicProperty("bbLength" + blockLocationAsString);
-        const worldSoundOptionsPitch = world.getDynamicProperty("bbPitch" + blockLocationAsString);
-        const worldSoundOptionsVolume = world.getDynamicProperty("bbVolume" + blockLocationAsString);
-
-        if (!fileNameProp || !trackLengthProp) return; // Ensure properties exist
-
-        const fileNameAsString = fileNameProp.toString();
-        const trackLength = this.parseTrackLength(Number(trackLengthProp)); // Convert to total seconds
-
         const currentTime = Date.now();
 
-        if (isPowered === 15) {
-            if (!blockState.isPlaying) {
-                const worldSoundOptions = {
-                    pitch: Number(worldSoundOptionsPitch),
-                    volume: Number(worldSoundOptionsVolume),
-                };
+        // Lazy cleanup every 60 seconds
+        if (currentTime - this.lastCleanup > 60000) {
+            this.blockStates.forEach((state, key) => {
+                if (currentTime - state.startTime > 60000) {
+                    // Cleanup if inactive for 60 seconds
+                    this.blockStates.delete(key);
+                }
+            });
+            this.lastCleanup = currentTime;
+        }
 
-                world.playSound(fileNameAsString, block.location, worldSoundOptions);
-                blockState.isPlaying = true;
-                blockState.startTime = currentTime;
-                blockState.trackLength = trackLength;
-                if(debugEnabled){
-                    console.log(`Block Beats [DEBUG]: Started playing ${fileNameAsString} at ${pos}`);
-                }
-            } else {
-                // Check if the track has completed
-                const elapsedTime = (currentTime - blockState.startTime) / 1000; // Convert to seconds
-                if(debugEnabled){
-                console.log("Block Beats [DEBUG]: elapsedTime: " + elapsedTime);
-                console.log("Block Beats [DEBUG]: currentTime: " + currentTime);
-                console.log("Block Beats [DEBUG]: trackLenght: " + trackLength);
-                }
-                if (elapsedTime >= blockState.trackLength) {
-                    const worldSoundOptions = {
-                        pitch: Number(worldSoundOptionsPitch),
-                        volume: Number(worldSoundOptionsVolume),
-                    };
+        // Ensure the blockState exists
+        let blockState = this.blockStates.get(pos);
+        if (!blockState) {
+            blockState = { isPlaying: false, startTime: 0, trackLength: 0 };
+            this.blockStates.set(pos, blockState);
+        }
 
-                    world.playSound(fileNameAsString, block.location, worldSoundOptions);
-                    blockState.startTime = currentTime; // Restart the track
-                    if(debugEnabled) {
-                        console.log("Block Beats [DEBUG]: Looping " + fileNameAsString + " at " + pos);
-                    }
-                  
-                }
+        // Retrieve dynamic properties (cached or on-demand)
+        if (!blockState.fileName || !blockState.trackLength || !blockState.pitch || !blockState.volume) {
+            const dynamicProps = this.getDynamicProperties(blockLocationAsString);
+            if (!dynamicProps.fileName || dynamicProps.trackLength === undefined || dynamicProps.pitch === undefined || dynamicProps.volume === undefined) {
+                // If properties are missing, consider this block inactive and clean up
+                this.blockStates.delete(pos);
+                return;
             }
-        } else if (isPowered === 0 && blockState.isPlaying) {
-            const stopCommand = `/stopsound @a ${fileNameAsString}`;
-            world.getDimension("overworld").runCommandAsync(stopCommand);
+            Object.assign(blockState, dynamicProps); // Cache the properties
+        }
 
-            blockState.isPlaying = false;
-            if(debugEnabled){
-                console.log(`Block Beats [DEBUG]: Stopped playing sound at ${pos}`);
+        const { fileName, trackLength, pitch, volume } = blockState;
+
+        if (isPowered === 15) {
+            this.playSoundIfNeeded(blockState, block, fileName!, trackLength!, pitch!, volume!, currentTime);
+        } else if (isPowered === 0) {
+            this.stopSoundIfNeeded(blockState, block, fileName!);
+
+            // Lazy cleanup: Remove block state if it's inactive and not powered
+            if (!blockState.isPlaying) {
+                this.blockStates.delete(pos);
             }
         }
     }

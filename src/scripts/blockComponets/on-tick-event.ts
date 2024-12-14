@@ -1,9 +1,15 @@
 import { world, BlockComponentTickEvent, Block } from "@minecraft/server";
 import { debugEnabled } from "../debug/debug";
 
+/**
+ * Handles redstone-triggered sound components efficiently.
+ */
 export class RedstoneComp {
+    /**
+     * Map of block states indexed by unique numeric keys for efficient access.
+     */
     private blockStates: Map<
-        string,
+        number,
         {
             isPlaying: boolean;
             startTime: number;
@@ -13,124 +19,187 @@ export class RedstoneComp {
             volume?: number;
         }
     >;
+
+    /**
+     * Tracks active blocks separately for faster iteration.
+     */
+    private activeBlocks: Set<number>;
+
+    /**
+     * Timestamp of the last cleanup operation.
+     */
     private lastCleanup: number;
 
     constructor() {
         this.onTick = this.onTick.bind(this);
         this.blockStates = new Map();
+        this.activeBlocks = new Set();
         this.lastCleanup = Date.now();
     }
 
-    // Utility function to parse track length from mm.ss format to total seconds
+    /**
+     * Generates a unique numeric key for a block based on its coordinates.
+     * Floats are truncated to integers to align with Minecraft block positioning.
+     *
+     * @param x - X coordinate of the block.
+     * @param y - Y coordinate of the block.
+     * @param z - Z coordinate of the block.
+     * @returns A unique numeric key for the block.
+     * @example
+     * ```typescript
+     * const key = generateKey(10.4, 64.0, 20.1); // Returns 100640200
+     * ```
+     */
+    private generateKey(x: number, y: number, z: number): number {
+        const intX = Math.floor(x);
+        const intY = Math.floor(y);
+        const intZ = Math.floor(z);
+
+        return intX * 1e8 + intY * 1e4 + intZ;
+    }
+
+    /**
+     * Parses a track length string in `mm.ss` format to total seconds.
+     *
+     * @param input - Track length as a number (e.g., 3.45 for 3 minutes, 45 seconds).
+     * @returns Total track length in seconds.
+     * @example
+     * ```typescript
+     * const length = parseTrackLength(3.45); // Returns 225
+     * ```
+     */
     private parseTrackLength(input: number): number {
         const [minutes = "0", seconds = "00"] = input.toString().split(".");
-        return parseInt(minutes, 10) * 60 + parseInt(seconds.padEnd(2, "0"), 10); // Pad seconds for consistency
+        return parseInt(minutes, 10) * 60 + parseInt(seconds.padEnd(2, "0"), 10);
     }
 
-    private getDynamicProperties(blockLocationAsString: string): {
-        fileName: string | undefined;
-        trackLength: number | undefined;
-        pitch: number | undefined;
-        volume: number | undefined;
-    } {
-        const fileNameProp = world.getDynamicProperty("bb" + blockLocationAsString);
-        const trackLengthProp = world.getDynamicProperty("bbLength" + blockLocationAsString);
-        const pitchProp = world.getDynamicProperty("bbPitch" + blockLocationAsString);
-        const volumeProp = world.getDynamicProperty("bbVolume" + blockLocationAsString);
+    /**
+     * Retrieves dynamic properties for a block based on its key.
+     * Now retrieves all data from a single `bbData` property.
+     *
+     * @param key - The unique key of the block.
+     * @returns The dynamic properties of the block or `null` if properties are missing.
+     * @example
+     * ```typescript
+     * const props = getDynamicProperties("123456789");
+     * if (props) {
+     *     console.log(props.fileName); // Logs the file name of the sound.
+     * }
+     * ```
+     */
+    private getDynamicProperties(key: string): { fileName: string; trackLength: number; pitch: number; volume: number } | null {
+        const bbData = world.getDynamicProperty(`bbData${key}`);
 
-        if (!fileNameProp || !trackLengthProp || pitchProp === undefined || volumeProp === undefined) {
-            return { fileName: undefined, trackLength: undefined, pitch: undefined, volume: undefined };
+        if (!bbData) return null;
+
+        try {
+            const { fileName, trackLength, pitch, volume } = JSON.parse(bbData.toString());
+            return {
+                fileName,
+                trackLength: this.parseTrackLength(trackLength),
+                pitch,
+                volume,
+            };
+        } catch (error) {
+            console.error("Error parsing bbData:", error);
+            return null;
         }
-
-        return {
-            fileName: fileNameProp.toString(),
-            trackLength: this.parseTrackLength(Number(trackLengthProp)),
-            pitch: Number(pitchProp),
-            volume: Number(volumeProp),
-        };
     }
 
-    private playSoundIfNeeded(blockState: { isPlaying: boolean; startTime: number; trackLength: number }, block: Block, fileName: string, trackLength: number, pitch: number, volume: number, currentTime: number): void {
-        if (!blockState.isPlaying) {
-            const soundOptions = { pitch, volume };
-            world.playSound(fileName, block.location, soundOptions);
-            blockState.isPlaying = true;
-            blockState.startTime = currentTime;
-            blockState.trackLength = trackLength;
-            if (debugEnabled) {
-                console.log(`Block Beats [DEBUG]: Started playing ${fileName} at ${block.location.x.toFixed(0)}, ${block.location.y.toFixed(0)}, ${block.location.z.toFixed(0)}`);
-            }
-        } else {
-            const elapsedTime = (currentTime - blockState.startTime) / 1000; // Convert to seconds
-            if (elapsedTime >= blockState.trackLength) {
-                const soundOptions = { pitch, volume };
-                world.playSound(fileName, block.location, soundOptions);
-                blockState.startTime = currentTime; // Restart the track
-                if (debugEnabled) {
-                    console.log(`Block Beats [DEBUG]: Looping ${fileName} at ${block.location.x.toFixed(0)}, ${block.location.y.toFixed(0)}, ${block.location.z.toFixed(0)}`);
+    /**
+     * Plays a sound at the specified block location.
+     *
+     * @param blockState - The state of the block.
+     * @param block - The block object.
+     * @param fileName - The name of the sound file.
+     * @param pitch - The pitch of the sound.
+     * @param volume - The volume of the sound.
+     * @param currentTime - The current timestamp.
+     */
+    private playSound(blockState: any, block: Block, fileName: string, pitch: number, volume: number, currentTime: number): void {
+        world.playSound(fileName, block.location, { pitch, volume });
+        blockState.isPlaying = true;
+        blockState.startTime = currentTime;
+
+        if (debugEnabled) {
+            console.log(`Block Beats [DEBUG]: Playing ${fileName} at ${block.location.x},${block.location.y},${block.location.z}`);
+        }
+    }
+
+    /**
+     * Stops the sound playing at the specified block location.
+     *
+     * @param blockState - The state of the block.
+     * @param block - The block object.
+     * @param fileName - The name of the sound file to stop.
+     */
+    private stopSound(blockState: any, block: Block, fileName: string): void {
+        world.getDimension("overworld").runCommandAsync(`/stopsound @a ${fileName}`);
+        blockState.isPlaying = false;
+
+        if (debugEnabled) {
+            console.log(`Block Beats [DEBUG]: Stopped sound at ${block.location.x},${block.location.y},${block.location.z}`);
+        }
+    }
+
+    /**
+     * Cleans up expired block states and active block references.
+     *
+     * @param currentTime - The current timestamp.
+     */
+    private cleanupStates(currentTime: number): void {
+        if (currentTime - this.lastCleanup > 60000) {
+            for (const key of this.blockStates.keys()) {
+                const state = this.blockStates.get(key)!;
+                if (currentTime - state.startTime > 60000) {
+                    this.blockStates.delete(key);
+                    this.activeBlocks.delete(key);
                 }
             }
+            this.lastCleanup = currentTime;
         }
     }
 
-    private stopSoundIfNeeded(blockState: { isPlaying: boolean }, block: Block, fileName: string): void {
-        if (blockState.isPlaying) {
-            const stopCommand = `/stopsound @a ${fileName}`;
-            world.getDimension("overworld").runCommandAsync(stopCommand);
-            blockState.isPlaying = false;
-            if (debugEnabled) {
-                console.log(`Block Beats [DEBUG]: Stopped playing sound at ${block.location.x.toFixed(0)}, ${block.location.y.toFixed(0)}, ${block.location.z.toFixed(0)}`);
-            }
-        }
-    }
-
+    /**
+     * Handles the tick event for redstone components.
+     *
+     * @param e - The BlockComponentTickEvent object.
+     */
     onTick(e: BlockComponentTickEvent): void {
         const block = e.block;
-        const blockLocationAsString = `${block.location.x}${block.location.y}${block.location.z}`;
-        const pos = `${block.location.x},${block.location.y},${block.location.z}`;
+        const key = this.generateKey(block.location.x, block.location.y, block.location.z);
         const isPowered = block.getRedstonePower();
         const currentTime = Date.now();
 
-        // Lazy cleanup every 60 seconds
-        if (currentTime - this.lastCleanup > 60000) {
-            this.blockStates.forEach((state, key) => {
-                if (currentTime - state.startTime > 60000) {
-                    // Cleanup if inactive for 60 seconds
-                    this.blockStates.delete(key);
-                }
-            });
-            this.lastCleanup = currentTime;
-        }
+        // Cleanup states periodically
+        if (currentTime - this.lastCleanup > 60000) this.cleanupStates(currentTime);
 
-        // Ensure the blockState exists
-        let blockState = this.blockStates.get(pos);
+        let blockState = this.blockStates.get(key);
         if (!blockState) {
             blockState = { isPlaying: false, startTime: 0, trackLength: 0 };
-            this.blockStates.set(pos, blockState);
+            this.blockStates.set(key, blockState);
         }
 
-        // Retrieve dynamic properties (cached or on-demand)
-        if (!blockState.fileName || !blockState.trackLength || !blockState.pitch || !blockState.volume) {
-            const dynamicProps = this.getDynamicProperties(blockLocationAsString);
-            if (!dynamicProps.fileName || dynamicProps.trackLength === undefined || dynamicProps.pitch === undefined || dynamicProps.volume === undefined) {
-                // If properties are missing, consider this block inactive and clean up
-                this.blockStates.delete(pos);
+        if (!blockState.fileName) {
+            const props = this.getDynamicProperties(key.toString());
+            if (!props) {
+                this.blockStates.delete(key);
+                this.activeBlocks.delete(key);
                 return;
             }
-            Object.assign(blockState, dynamicProps); // Cache the properties
+            Object.assign(blockState, props);
         }
 
         const { fileName, trackLength, pitch, volume } = blockState;
 
         if (isPowered === 15) {
-            this.playSoundIfNeeded(blockState, block, fileName!, trackLength!, pitch!, volume!, currentTime);
-        } else if (isPowered === 0) {
-            this.stopSoundIfNeeded(blockState, block, fileName!);
-
-            // Lazy cleanup: Remove block state if it's inactive and not powered
-            if (!blockState.isPlaying) {
-                this.blockStates.delete(pos);
+            if (!blockState.isPlaying || (currentTime - blockState.startTime) / 1000 >= trackLength) {
+                this.playSound(blockState, block, fileName, pitch, volume, currentTime);
+                this.activeBlocks.add(key);
             }
+        } else if (isPowered === 0 && blockState.isPlaying) {
+            this.stopSound(blockState, block, fileName);
+            this.activeBlocks.delete(key);
         }
     }
 }

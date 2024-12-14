@@ -38,8 +38,8 @@ export class RecordBox {
 
         const configUI = new ModalFormData()
             .title("§9Block Beats - Block Config")
-            .textField("FileName", fileName)
-            .textField("Track Length", trackLength)
+            .textField("FileName", fileName, fileName)
+            .textField("Track Length", trackLength, trackLength)
             .toggle("Loop?", isLooping)
             .slider("Pitch", 0.1, 2.0, 0.1, pitch)
             .slider("Volume", 0.01, 1.0, 0.01, volume);

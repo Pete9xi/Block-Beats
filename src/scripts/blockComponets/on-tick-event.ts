@@ -117,7 +117,7 @@ export class RedstoneComp {
      * @param currentTime - The current timestamp.
      */
     private playSound(blockState: any, block: Block, fileName: string, pitch: number, volume: number, currentTime: number): void {
-        world.playSound(fileName, block.location, { pitch, volume });
+        block.dimension.playSound(fileName, block.location, { pitch, volume });
         blockState.isPlaying = true;
         blockState.startTime = currentTime;
 
@@ -134,7 +134,7 @@ export class RedstoneComp {
      * @param fileName - The name of the sound file to stop.
      */
     private stopSound(blockState: any, block: Block, fileName: string): void {
-        world.getDimension("overworld").runCommandAsync(`/stopsound @a ${fileName}`);
+        block.dimension.runCommandAsync(`/stopsound @a ${fileName}`);
         blockState.isPlaying = false;
 
         if (debugEnabled) {

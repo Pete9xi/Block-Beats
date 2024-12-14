@@ -84,8 +84,16 @@ function createDistributionArchive(outputFilePath, addonDir) {
         fs.unlinkSync(outputFilePath);
     }
 
-    // Create the .mcaddon file by zipping the folder structure
-    runCommand("7z", ["a", `-tzip`, outputFilePath, "build/addon/resource_packs", "build/addon/behavior_packs"], { cwd: addonDir });
+    // Run the 7z command to create the archive
+    const result = runCommand("7z", ["a", `-tzip`, outputFilePath, "build/addon/resource_packs", "build/addon/behavior_packs"], { cwd: addonDir });
+
+    // Check for system-level error
+    if (result.error) {
+        console.error(`Error while creating distribution archive: ${result.error.message}`);
+        process.exit(1); // Exit the process for system-level errors
+    }
+
+    console.log("Archive created successfully!");
 }
 
 // Function to modify the .mcaddon file by removing the addon directory

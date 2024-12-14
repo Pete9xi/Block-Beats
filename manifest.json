@@ -10,7 +10,7 @@
     "metadata": {
         "authors": ["Pete9xi"],
         "license": "GPLv3",
-        "url": "https://github.com/Pete9xi/Custom-Audio-Mod"
+        "url": "https://github.com/Pete9xi/Block-Beats"
     },
     "modules": [
         {
@@ -29,8 +29,8 @@
     ],
     "dependencies": [
         {
-            "uuid": "6f1be613-2e47-d451-205e-5196af1168f5",
-            "version": [1, 0, 0]
+            "uuid": "2f1aed3e-bd4e-47dc-af97-c6aa55da67af", 
+            "version": [1, 0, 2]
         },
         {
             "module_name": "@minecraft/server",

@@ -2,6 +2,7 @@ import path from "path";
 import fs from "fs-extra";
 import { spawnSync } from "child_process";
 import { fileURLToPath } from "url";
+import { path7za } from "7zip-bin";
 import AdmZip from "adm-zip"; // Import adm-zip for modifying zip files
 
 // Constants
@@ -85,7 +86,8 @@ function createDistributionArchive(outputFilePath, addonDir) {
     }
 
     // Run the 7z command to create the archive
-    const result = runCommand("7z", ["a", `-tzip`, outputFilePath, "build/addon/resource_packs", "build/addon/behavior_packs"], { cwd: addonDir });
+    const sevenZipPath = path7za;
+    const result = runCommand(sevenZipPath, ["a", `-tzip`, outputFilePath, "build/addon/resource_packs", "build/addon/behavior_packs"], { cwd: addonDir });
 
     // Check for system-level error
     if (result.error) {

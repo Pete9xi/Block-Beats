@@ -1,20 +1,18 @@
 {
-	"format_version": "1.14.0",
-	"sound_definitions": {
-		"record.steampunk": {
-			"__use_legacy_max_distance": true,
-			"category": "record",
-			"max_distance": 30.0,
-			"min_distance": null,
-			"sounds": [
-				{
-					"load_on_low_memory": true,
-					"name": "sounds/steampunk",
-					"stream": true,
-					"volume": 0.50
-				}
-			]
-		}
-		
-	}
+    "format_version": "1.14.0",
+    "sound_definitions": {
+        "record.steampunk": {
+            "__use_legacy_max_distance": true,
+            "category": "record",
+            "max_distance": 30.0,
+            "min_distance": null,
+            "sounds": [
+                {
+                    "name": "sounds/steampunk",
+                    "stream": true,
+                    "volume": 0.5
+                }
+            ]
+        }
+    }
 }

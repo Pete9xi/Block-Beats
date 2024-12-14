@@ -1,9 +1,10 @@
 {
-    "name": "Block Beats",
+    "name": "block_beats",
     "version": "1.0.0",
     "productName": "Block Beats",
     "description": "Block Beats is an innovative Minecraft Bedrock Edition mod that enables players to bring custom audio into their worlds using redstone mechanics.",
     "private": true,
+    "type": "module",
     "devDependencies": {
         "@types/fs-extra": "11.0.4",
         "@types/glob": "8.1.0",
@@ -15,7 +16,8 @@
         "fs-extra": "11.2.0",
         "glob": "11.0.0",
         "prettier": "3.4.2",
-        "typescript": "5.7.2"
+        "typescript": "5.7.2",
+        "chalk": "5.3.0"
     },
     "dependencies": {
         "@minecraft/server": "1.17.0-beta.1.21.51-stable",
@@ -23,7 +25,7 @@
     },
     "overrides": {
         "@minecraft/server-ui": {
-            "@minecraft/server": "1.17.0-beta.1.21.50-stable"
+            "@minecraft/server": "1.17.0-beta.1.21.51-stable"
         }
     },
     "prettier": {
@@ -37,23 +39,10 @@
         "enableMcLoopback": "CheckNetIsolation.exe LoopbackExempt -a -p=S-1-15-2-1958404141-86561845-1752920682-3514627264-368642714-62675701-733520436",
         "enableMcPreviewLoopback": "CheckNetIsolation.exe LoopbackExempt -a -p=S-1-15-2-424268864-5579737-879501358-346833251-474568803-887069379-4040235476",
         "format": "npx prettier --write --ignore-path .prettierignore ./",
-        "server": "node server.js",
-        "test-build": "node test-build.js",
-        "linux//": " --- BUILD (Linux) --- ",
-        "clean": "rm -rf build/",
-        "mkDirs": "mkdir -p build",
-        "copy:vanilla-data": "cp -R src/node_modules build/scripts",
-        "copy:assets": "cp -R animation_controllers/ animations entities/ blocks/ items/ functions/ CHANGELOG.md LICENSE manifest.json pack_icon.png README.md build",
-        "build": "./node_modules/typescript/bin/tsc -p tsconfig.json; npm run copy:assets; npm run copy:vanilla-data",
-        "dist": "npm run clean; npm run format; npm run build; cd build; zip -0 -r RecordBox-v${npm_package_version}.mcpack .",
-        "windows//": " --- BUILD (Windows) --- ",
-        "clean_win": "rd /s /q build>nul 2>&1|echo.>nul",
-        "mkdir_win": "@if exist build (rd /s /q build && mkdir build) else (mkdir build)",
-        "copy:win-vanilla-data": "@powershell Copy-Item -Path ^(\\\"src\\node_modules\\\"^) -Destination \"build\\scripts\" -Recurse",
-        "copy_assets_win": "@powershell Copy-Item -Path ^(\\\"animation_controllers\\\",\\\"animations\\\",\\\"entities\\\",\\\"functions\\\",\\\"CHANGELOG.md\\\",\\\"LICENSE\\\",\\\"manifest.json\\\",\\\"pack_icon.png\\\",\\\"blocks\\\",\\\"items\\\",\\\"README.md\\\"^) -Destination \"build\" -Recurse",
-        "build_win": "npm run mkdir_win 1>nul && node node_modules\\typescript\\bin\\tsc -p tsconfig.json && npm run copy_assets_win 1>nul && npm run copy:win-vanilla-data 1>nul",
-        "build_win_noscript": "npm run mkdir_win 1>nul && npm run copy_assets_win 1>nul",
-        "zip_win": "npm run clean_win && npm run build_win && cd build && node -e \"const path = require('path'); const arch = process.arch.startsWith('arm') ? 'arm64' : (process.arch === 'x32' ? 'ia32' : 'x64'); const executable = path.join(__dirname, '..', 'node_modules', '7zip-bin', 'win', arch, '7za'); require('child_process').execSync(`${executable} a -tzip RecordBox-v%npm_package_version%.zip .`);\"",
-        "dist_win": "npm run clean_win && npm run format && npm run build_win 1>nul && npm run zip_win 1>nul && powershell -Command \"Rename-Item -Path 'build\\RecordBox-v%npm_package_version%.zip' -NewName 'RecordBox-v%npm_package_version%.mcpack'\""
+        "git-tree": "node bin/git-tree.js",
+        "test": "node bin/test-build.js",
+        "check-naming": "node bin/tree-format.js",
+        "build": "npm run check-naming & node bin/build-package.js",
+        "dist": "npm run check-naming & node bin/build-package.js --mcpack"
     }
 }

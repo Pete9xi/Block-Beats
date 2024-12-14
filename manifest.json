@@ -24,7 +24,7 @@
             "type": "script",
             "uuid": "091441bd-c4ff-4cbf-b721-395d3a0d6532",
             "version": [0, 0, 1],
-            "entry": "scripts/customAudio.js"
+            "entry": "scripts/custom-audio.js"
         }
     ],
     "dependencies": [

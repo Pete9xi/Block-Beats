@@ -47,10 +47,10 @@ Block Beats now utilizes the 1.17.0-Beta server and 1.4.0-Beta server-ui APIs, e
 <h3>If you think a page is missing</h3>
 
 > Create an issue and request its addition  
-> [GitHub/Custom-Audio-Mod - Issues](https://github.com/Pete9xi/Block-Beats/)
+> [GitHub/Block-Beats - Issues](https://github.com/Pete9xi/Block-Beats/)
 
 OR
 
 > If you've already created it yourself,  
 > Submit it as a pull request, so your work can be added to this documentation.  
-> [GitHub/Custom-Audio-Mod - Pull Request](https://github.com/Pete9xi/Block-Beats/)
+> [GitHub/Block-Beats - Pull Request](https://github.com/Pete9xi/Block-Beats/)

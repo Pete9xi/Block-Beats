@@ -11,7 +11,7 @@ In survival mode the player can obtain the block by crafting the recipe in the c
 ?> There is currently a bug with the following wood types
 > - Cherry Planks
 > - Bamboo Planks
-> - Warpped Planks
+> - Warped Planks
 > - Crimson Planks
 > - Pale Oak Planks
 > - Mangrove Planks

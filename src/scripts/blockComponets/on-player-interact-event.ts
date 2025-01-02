@@ -96,7 +96,7 @@ export class RecordBox {
 
             const lockProp = world.getDynamicProperty(`bbLock${blockLocationKey}`);
 
-            if (mainHandItem.typeId === "minecraft:stick") {
+            if (mainHandItem && mainHandItem.typeId === "minecraft:stick") {
                 if (lockProp === undefined) {
                     // Lock the block
                     world.setDynamicProperty(`bbLock${blockLocationKey}`, "locked");
@@ -110,6 +110,8 @@ export class RecordBox {
 
             if (lockProp === "locked") {
                 player.sendMessage(`§9Block Beats:§r This block is currently locked.`);
+                //block is locked so we can play the sound if the player has clicked on the block
+                block.dimension.playSound(blockData.fileName, block.location, { pitch: blockData.pitch, volume: blockData.volume });
                 return;
             }
 

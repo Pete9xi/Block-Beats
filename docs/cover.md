@@ -3,3 +3,4 @@
 
 [GitHub](https://github.com/Pete9xi/Block-Beats)
 [Documentation](documentation.md)
+[Resource Pack Editor](/rpEditor/editor.md)

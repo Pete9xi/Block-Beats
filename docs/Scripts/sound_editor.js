@@ -90,7 +90,7 @@ createArchiveButton.addEventListener('click', async () => {
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.setAttribute('download', 'BlockBeats_RP.zip');
+    link.setAttribute('download', 'BlockBeats_RP.mcpack');
     document.body.appendChild(link);
     link.click();
     link.parentNode.removeChild(link);

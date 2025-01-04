@@ -26,6 +26,36 @@ export class RecordBox {
     }
 
     /**
+     * Parses a track length string in `mm.ss` format to total seconds.
+     *
+     * @param input - Track length as a number (e.g., 3.45 for 3 minutes, 45 seconds).
+     * @returns Total track length in seconds.
+     */
+    private static parseTrackLength(input: number): number {
+        const [minutes = "0", seconds = "00"] = input.toString().split(".");
+        return parseInt(minutes, 10) * 60 + parseInt(seconds.padEnd(2, "0"), 10);
+    }
+
+    /**
+     * Converts a track length in seconds back to the `mm.ss` format.
+     *
+     * @param seconds - The track length in seconds.
+     * @returns The track length in `mm.ss` format.
+     */
+    private static reverseParseTrackLength(seconds: number): string {
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = Math.floor(seconds % 60);
+
+        // If there are no remaining seconds, return only the minutes as a whole number.
+        if (remainingSeconds === 0) {
+            return `${minutes}.00`;
+        }
+
+        // Otherwise, return in mm.ss format
+        return `${minutes}.${remainingSeconds.toString().padStart(2, "0")}`;
+    }
+
+    /**
      * Displays a configuration UI for the block.
      *
      * @param player - The player interacting with the block.
@@ -39,7 +69,7 @@ export class RecordBox {
         const configUI = new ModalFormData()
             .title("§9Block Beats - Block Config")
             .textField("FileName", fileName, fileName)
-            .textField("Track Length", trackLength, trackLength)
+            .textField("Track Length", RecordBox.reverseParseTrackLength(trackLength), RecordBox.reverseParseTrackLength(trackLength))
             .toggle("Loop?", isLooping)
             .slider("Pitch", 0.1, 2.0, 0.1, pitch)
             .slider("Audio Load Distance", 0.01, 100.0, 50.0, volume);
@@ -49,23 +79,36 @@ export class RecordBox {
             if (formData.cancelationReason === "UserClosed") return;
             const [newFileName, newTrackLength, newIsLooping, newPitch, newVolume] = formData.formValues;
 
-            // Create the block data object
+            // Ensure the trackLength is properly parsed back into seconds before storing
+            const trackLengthInSeconds = RecordBox.parseTrackLength(parseFloat(newTrackLength as string));
+
+            // Create the block data object for configuration
             const blockData = {
-                fileName: newFileName.toString(),
-                trackLength: newTrackLength.toString(),
+                fileName: newFileName,
+                trackLength: trackLengthInSeconds,
                 isLooping: newIsLooping,
                 pitch: newPitch,
                 volume: newVolume,
+                isPlaying: false,
+                startTime: 0,
             };
 
-            // Store the entire block data object as a serialized JSON string
+            // Store the entire block data object as a serialized JSON string under a different key
             world.setDynamicProperty(`bbData${blockLocationKey}`, JSON.stringify(blockData));
 
             if (debugEnabled) {
                 console.log(`Block Beats [DEBUG]: ${JSON.stringify(blockData)}`);
             }
         } catch (error) {
-            console.log("Failed to show form:", error);
+            console.error("Block Beats Unhandled Rejection: ", error);
+            // Extract stack trace information
+            if (error instanceof Error) {
+                const stackLines = error.stack.split("\n");
+                if (stackLines.length > 1) {
+                    const sourceInfo = stackLines;
+                    console.error("Error originated from:", sourceInfo[0]);
+                }
+            }
         }
     }
 
@@ -85,13 +128,13 @@ export class RecordBox {
         const mainHandItem: ItemStack = playerEquipComp.getEquipment("Mainhand" as EquipmentSlot);
 
         // Fetch the serialized block data object
-        const blockDataString = world.getDynamicProperty(`bbData${blockLocationKey}`);
+        const blockDataString = world.getDynamicProperty(`bbData${blockLocationKey}`); // Fetch config data from a separate key
 
         if (blockDataString === undefined) {
-            // No data found, open configuration UI
+            // No config data found, open configuration UI
             await RecordBox.showConfigUI(player, blockLocationKey);
         } else {
-            // Deserialize the block data object
+            // Deserialize the configuration block data object
             const blockData = JSON.parse(blockDataString as string);
 
             const lockProp = world.getDynamicProperty(`bbLock${blockLocationKey}`);
@@ -100,6 +143,7 @@ export class RecordBox {
                 if (lockProp === undefined) {
                     // Lock the block
                     world.setDynamicProperty(`bbLock${blockLocationKey}`, "locked");
+                    player.sendMessage(`§9Block Beats:§r This block has been locked.`);
                 } else {
                     // Unlock the block
                     world.setDynamicProperty(`bbLock${blockLocationKey}`, undefined);
@@ -122,6 +166,16 @@ export class RecordBox {
                 isLooping: blockData.isLooping,
                 pitch: blockData.pitch,
                 volume: blockData.volume,
+            }).catch((error) => {
+                console.error("Block Beats Unhandled Rejection: ", error);
+                // Extract stack trace information
+                if (error instanceof Error) {
+                    const stackLines = error.stack.split("\n");
+                    if (stackLines.length > 1) {
+                        const sourceInfo = stackLines;
+                        console.error("Error originated from:", sourceInfo[0]);
+                    }
+                }
             });
         }
     }

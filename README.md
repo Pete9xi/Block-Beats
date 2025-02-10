@@ -48,6 +48,6 @@ Block Beats now utilizes the 1.17.0-Beta server and 1.4.0-Beta server-ui APIs, e
     <div align="center">
   <h2>Community Discord.</h2>
    Need assistance or have questions? Join our community
-   <a href="https://discord.gg/ErFJnHuBX7">discord server</a>
+   <a href="https://discord.gg/uKEAHxSaGn">discord server</a>
 </div>
 </div>

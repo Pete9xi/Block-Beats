@@ -82,14 +82,14 @@ createArchiveButton.addEventListener('click', async () => {
     const updatedJson = window.jsonEditor.getValue();
 
     // Step 1: Save version to backend
-    await fetch(`https://portal.oshosting.co.uk:3000/update_version/${userId}`, {
+    await fetch(`https://osh01.oshosting.co.uk:3000/update_version/${userId}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ version: versionInput }),
     });
 
     // Step 2: Save JSON to backend
-    await fetch(`https://portal.oshosting.co.uk:3000/update_json/${userId}`, {
+    await fetch(`https://osh01.oshosting.co.uk:3000/update_json/${userId}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: updatedJson,
@@ -99,13 +99,13 @@ createArchiveButton.addEventListener('click', async () => {
     const formData = new FormData();
     Array.from(audioFilesInput.files).forEach(file => formData.append('audioFiles', file));
 
-    await fetch(`https://portal.oshosting.co.uk:3000/upload_audio/${userId}`, {
+    await fetch(`https://osh01.oshosting.co.uk:3000/upload_audio/${userId}`, {
       method: 'POST',
       body: formData,
     });
 
     // Step 4: Create and download archive
-    const archiveResponse = await fetch(`https://portal.oshosting.co.uk:3000/create_archive/${userId}`);
+    const archiveResponse = await fetch(`https://osh01.oshosting.co.uk:3000/create_archive/${userId}`);
     if (!archiveResponse.ok) throw new Error('Archive creation failed');
 
     const blob = await archiveResponse.blob();
@@ -118,7 +118,7 @@ createArchiveButton.addEventListener('click', async () => {
     link.parentNode.removeChild(link);
 
     // Step 5: Cleanup user data
-    await fetch(`https://portal.oshosting.co.uk:3000/cleanup/${userId}`);
+    await fetch(`https://osh1.oshosting.co.uk:3000/cleanup/${userId}`);
 
     console.log('Process completed successfully!');
   } catch (error) {

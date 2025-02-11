@@ -18,6 +18,6 @@
 
     -   [Getting involved](Contributing/gettinginvolved.md "Getting involved")
 
--   <a href="#/rpEditor/editor.md" title="Home" style="color: white; font-size: larger; font-weight: bolder">RP Editor</a>
+-   <a href="#/rpEditor/editor.md" title="Home" style="color: white; font-size: larger; font-weight: bolder">Resource Pack Editor</a>
 
 [<img src="./Media/Discord-logo.png" alt="Join our Discord server" width="140">](Support/support.md "Support")

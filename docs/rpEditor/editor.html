@@ -4,50 +4,88 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Resource Pack Editor</title>
-      <!-- Import the UUID library first -->
-      <script src="https://cdn.jsdelivr.net/npm/uuid@8.3.2/dist/umd/uuid.min.js"></script>
-      <!-- Load Monaco Editor -->
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
+    
     <!-- Docsify Theme -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify-themeable@0.9.0/dist/css/theme-simple-dark.css">
+
     <style>
-         /* Override Docsify h1 and h2 to set custom sizes */
-    h1 {
-        font-size: 3rem; /* Custom size for h1 */
-    }
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: auto;
+            padding: 20px;
+            text-align: center;
+        }
 
-    h2 {
-        font-size: 2rem; /* Custom size for h2 */
-    }
+        h1 {
+            font-size: 3rem;
+        }
 
+        h2 {
+            font-size: 2rem;
+            margin-top: 20px;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: auto;
+            text-align: left;
+        }
+
+        #jsonEditor {
+            height: 400px;
+            width: 100%;
+            border: 1px solid #ccc;
+        }
     </style>
-
 </head>
 <body>
 
-    <img src="../Media/blockbeats.png" alt="Let's Go">
+    <div class="container">
+        <img src="../Media/blockbeats.png" alt="Let's Go">
 
-    <h1>Welcome to the Resource Pack Editor</h1>
-    <p>
-        This tool enables you to modify the sound_definitions.json file and upload custom audio files. Once completed, you can download an updated resource pack, ready to be uploaded to your server or world.</p>
-    <h2>Update Version Number</h2>
-    <div>
-        <textarea id="rpVersion" rows="1" cols="20" placeholder="1.0.0"></textarea>
-    </div>
-    <h2>Edit JSON Data</h2>
-    <div id="jsonEditor" style="height: 400px; width: 90%; max-width: 1200px; border: 1px solid #ccc;"></div>
-    </div>
-    <h2>Upload Audio Files</h2>
-    <form id="audioUploadForm" enctype="multipart/form-data">
-        <label for="audioFiles">Upload Audio Files (.ogg):</label>
-        <input type="file" id="audioFiles" accept=".ogg" multiple>
-    </form>
-    <h2>Generate JSON Preview</h2>
-    <button type="button" id="generateJsonButton">Generate JSON</button>
-    
-    <h2>Create and Download McPack</h2>
-    <button type="button" id="createArchiveButton">Download Pack</button>
+        <h1>Welcome to the Resource Pack Editor</h1>
+        <p>
+            This tool enables you to modify the <code>sound_definitions.json</code> file and upload custom audio files. 
+            Once completed, you can download an updated resource pack, ready to be uploaded to your server or world.
+        </p>
 
+        <section>
+            <h2>Update Version Number</h2>
+            <label for="rpVersion">Version:</label>
+            <textarea id="rpVersion" rows="1" cols="20" placeholder="1.0.0"></textarea>
+        </section>
+
+        <section>
+            <h2>Edit JSON Data</h2>
+            <div id="jsonEditor"></div>
+        </section>
+
+        <section>
+            <h2>Upload Audio Files</h2>
+            <form id="audioUploadForm" enctype="multipart/form-data">
+                <label for="audioFiles">Upload Audio Files (.ogg):</label>
+                <input type="file" id="audioFiles" accept=".ogg" multiple>
+            </form>
+        </section>
+
+        <section>
+            <h2>Generate JSON Preview</h2>
+            <button type="button" id="generateJsonButton">Generate JSON</button>
+        </section>
+
+        <section>
+            <h2>Create and Download McPack</h2>
+            <button type="button" id="createArchiveButton">Download Pack</button>
+        </section>
+    </div>
+
+    <!-- Import the UUID library -->
+    <script src="https://cdn.jsdelivr.net/npm/uuid@8.3.2/dist/umd/uuid.min.js"></script>
+    <!-- Load Monaco Editor -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
     <script src="../Scripts/sound_editor.js"></script>
+
 </body>
 </html>

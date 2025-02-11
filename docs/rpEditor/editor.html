@@ -6,6 +6,8 @@
     <title>Resource Pack Editor</title>
       <!-- Import the UUID library first -->
       <script src="https://cdn.jsdelivr.net/npm/uuid@8.3.2/dist/umd/uuid.min.js"></script>
+      <!-- Load Monaco Editor -->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
     <!-- Docsify Theme -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify-themeable@0.9.0/dist/css/theme-simple-dark.css">
     <style>
@@ -33,16 +35,16 @@
         <textarea id="rpVersion" rows="1" cols="20" placeholder="1.0.0"></textarea>
     </div>
     <h2>Edit JSON Data</h2>
-    <div>
-        <textarea id="jsonEditor" rows="20" cols="80"></textarea>
+    <div id="jsonEditor" style="height: 400px; width: 90%; max-width: 1200px; border: 1px solid #ccc;"></div>
     </div>
-
     <h2>Upload Audio Files</h2>
     <form id="audioUploadForm" enctype="multipart/form-data">
         <label for="audioFiles">Upload Audio Files (.ogg):</label>
         <input type="file" id="audioFiles" accept=".ogg" multiple>
     </form>
-
+    <h2>Generate JSON Preview</h2>
+    <button type="button" id="generateJsonButton">Generate JSON</button>
+    
     <h2>Create and Download McPack</h2>
     <button type="button" id="createArchiveButton">Download Pack</button>
 

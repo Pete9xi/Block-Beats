@@ -118,7 +118,7 @@ createArchiveButton.addEventListener('click', async () => {
     link.parentNode.removeChild(link);
 
     // Step 5: Cleanup user data
-    await fetch(`https://osh1.oshosting.co.uk:3000/cleanup/${userId}`);
+    await fetch(`https://osh01.oshosting.co.uk:3000/cleanup/${userId}`);
 
     console.log('Process completed successfully!');
   } catch (error) {

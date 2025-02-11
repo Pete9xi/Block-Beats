@@ -43,7 +43,7 @@ Block Beats now utilizes the 1.17.0-Beta server and 1.4.0-Beta server-ui APIs, e
    <div align="center">
   <h2>Documentation</h2>
   See the full documentation 
-   <a href="">here</a>
+   <a href="https://pete9xi.github.io/Block-Beats/#/">here</a>
 </div>
     <div align="center">
   <h2>Community Discord.</h2>

@@ -50,4 +50,13 @@ Block Beats now utilizes the 1.17.0-Beta server and 1.4.0-Beta server-ui APIs, e
    Need assistance or have questions? Join our community
    <a href="https://discord.gg/uKEAHxSaGn">discord server</a>
 </div>
+<div align="center">
+  <h2>Project Status</h2>
+  <img src="https://www.codefactor.io/repository/github/pete9xi/Block-Beats/badge/main" alt="Grade">
+  <img src="https://img.shields.io/github/downloads/Pete9xi/Block-Beats/total?style=plastic&logo=appveyor" alt="Downloads">
+  <img src="https://img.shields.io/github/downloads/Pete9xi/Block-Beats/latest/total?style=plastic&logo=appveyor" alt="Latest Downloads">
+  <img src="https://img.shields.io/github/commit-activity/m/Pete9xi/Block-Beats?style=plastic&logo=appveyor" alt="Commits Per Month">
+  <img src="https://img.shields.io/github/last-commit/Pete9xi/Block-Beats?style=plastic&logo=appveyor" alt="Last Commit">
+  <img src="https://img.shields.io/github/license/Pete9xi/Block-Beats?style=plastic&logo=appveyor" alt="License">
+</div>
 </div>

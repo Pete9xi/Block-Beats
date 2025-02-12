@@ -1,7 +1,7 @@
 <div align="center">
   <img src="https://i.imgur.com/RuYU6WF.png" alt="Block Beats">
   <br><br>
-  <p><b>Updated for Minecraft Bedrock 1.21.50</b><br>
+  <p><b>Updated for Minecraft Bedrock 1.21.60</b><br>
    Block Beats is an innovative Minecraft Bedrock Edition mod that enables players to bring custom audio into their worlds using redstone mechanics.
 
 Block Beats now utilizes the 1.17.0-Beta server and 1.4.0-Beta server-ui APIs, enhancing compatibility and performance for Minecraft Bedrock.</p>

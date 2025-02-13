@@ -20,6 +20,8 @@ Block Beats includes a custom resource pack, which is essential for playing your
 - Adding Your Audio Files:
 Place your custom audio files in the resource pack. Detailed steps can be found in the Audio Documentation section.
 
+!> We now have a fully [automated tool](https://pete9xi.github.io/Block-Beats/#/rpEditor/editor.md) simply upload your audio files and download the created pack 
+
 - Applying the Pack:
 Ensure the resource pack is applied to your world, realm, or server before you start. This is a critical step for the mod to access your audio files.
 

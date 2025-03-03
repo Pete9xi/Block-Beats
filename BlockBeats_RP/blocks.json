@@ -1,5 +1,6 @@
 {
-	"recordbox": {
-		"sound": "wood"
-	}
+    "format_version": "1.21.50",
+    "recordbox": {
+        "sound": "wood"
+    }
 }

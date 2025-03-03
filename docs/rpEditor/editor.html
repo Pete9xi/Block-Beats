@@ -38,6 +38,36 @@
             width: 100%;
             border: 1px solid #ccc;
         }
+
+        /* Loading Spinner */
+        #loading {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(30,30,30,255);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            color: white;
+            font-size: 18px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-top: 5px solid #035fff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 10px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -79,6 +109,12 @@
             <h2>Create and Download McPack</h2>
             <button type="button" id="createArchiveButton">Download Pack</button>
         </section>
+    </div>
+
+    <!-- Loading Indicator -->
+    <div id="loading">
+        <p>Generating the resource pack...</p>
+        <div class="spinner"></div>
     </div>
 
     <!-- Import the UUID library -->

@@ -103,7 +103,7 @@ export class RedstoneComp {
 
         let blockState = this.getDynamicProperties(`${key}`);
 
-        if (isPowered === 15) {
+        if (isPowered > 0) {
             if (blockState) {
                 const elapsedTime = (currentTime - blockState.startTime) / 1000;
 

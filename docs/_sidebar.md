@@ -10,6 +10,7 @@
     -  [Adding Audio](Documentation/addingAudioFiles.md "Block Beats")
     -  [Limitations](Documentation/limitations.md "Block Beats")
     -  [Crafting Guide](Documentation/crafting.md "Block Beats")
+    -  [Configuration](Documentation/configUI.md "Block Beats")
 
 
 

@@ -64,7 +64,7 @@ export class RecordBox {
      * @returns A promise resolving after the UI interaction.
      */
     private static async showConfigUI(player: Player, blockLocationKey: number, defaultValues: any = {}): Promise<void> {
-        const { fileName = "", trackLength = "", isLooping = false, pitch = 1.0, volume = 50.0 } = defaultValues;
+        const { fileName = "", trackLength = "", isLooping = false, pitch = 1.0, volume = 50.0, isBlockPulsed = false } = defaultValues;
 
         const configUI = new ModalFormData()
             .title("§9Block Beats - Block Config")
@@ -72,12 +72,13 @@ export class RecordBox {
             .textField("Track Length", RecordBox.reverseParseTrackLength(trackLength), RecordBox.reverseParseTrackLength(trackLength))
             .toggle("Loop?", isLooping)
             .slider("Pitch", 0.1, 2.0, 0.1, pitch)
-            .slider("Audio Load Distance", 0.01, 100.0, 50.0, volume);
+            .slider("Audio Load Distance", 0.01, 100.0, 50.0, volume)
+            .toggle("Enable Play when Pulsed?", isBlockPulsed);
 
         try {
             const formData: ModalFormResponse = await configUI.show(player);
             if (formData.cancelationReason === "UserClosed") return;
-            const [newFileName, newTrackLength, newIsLooping, newPitch, newVolume] = formData.formValues;
+            const [newFileName, newTrackLength, newIsLooping, newPitch, newVolume, newisBlockPulsed] = formData.formValues;
 
             // Ensure the trackLength is properly parsed back into seconds before storing
             const trackLengthInSeconds = RecordBox.parseTrackLength(parseFloat(newTrackLength as string));
@@ -91,6 +92,7 @@ export class RecordBox {
                 volume: newVolume,
                 isPlaying: false,
                 startTime: 0,
+                isBlockPulsed: newisBlockPulsed,
             };
 
             // Store the entire block data object as a serialized JSON string under a different key
@@ -166,6 +168,7 @@ export class RecordBox {
                 isLooping: blockData.isLooping,
                 pitch: blockData.pitch,
                 volume: blockData.volume,
+                isBlockPulsed: blockData.isBlockPulsed,
             }).catch((error) => {
                 console.error("Block Beats Unhandled Rejection: ", error);
                 // Extract stack trace information

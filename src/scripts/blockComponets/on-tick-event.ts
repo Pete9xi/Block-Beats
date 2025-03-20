@@ -32,7 +32,7 @@ export class RedstoneComp {
      * @param key - The unique key of the block.
      * @returns The dynamic properties of the block or `null` if properties are missing.
      */
-    private getDynamicProperties(key: string): { fileName: string; trackLength: number; pitch: number; volume: number; isPlaying: boolean; startTime: number; isLooping: boolean } | null {
+    private getDynamicProperties(key: string): { fileName: string; trackLength: number; pitch: number; volume: number; isPlaying: boolean; startTime: number; isLooping: boolean; isBlockPulsed: boolean } | null {
         const bbData = world.getDynamicProperty(`bbData${key}`) as string; // Read redstone data from a specific key
 
         if (!bbData) return null;
@@ -103,23 +103,24 @@ export class RedstoneComp {
 
         let blockState = this.getDynamicProperties(`${key}`);
 
-        if (isPowered > 0) {
-            if (blockState) {
-                const elapsedTime = (currentTime - blockState.startTime) / 1000;
+        const elapsedTime = (currentTime - blockState.startTime) / 1000;
 
-                // Check if the sound should play initially or loop when finished
-                if (!blockState.isPlaying || (elapsedTime >= blockState.trackLength && blockState.isLooping)) {
-                    this.playSound(block, blockState.fileName, blockState.pitch, blockState.volume);
-                    blockState.isPlaying = true;
-                    blockState.startTime = currentTime;
-                    this.setDynamicProperties(key, blockState);
-                }
+        if (isPowered > 0) {
+            if (!blockState.isPlaying || (elapsedTime >= blockState.trackLength && blockState.isLooping)) {
+                this.playSound(block, blockState.fileName, blockState.pitch, blockState.volume);
+                blockState.isPlaying = true;
+                blockState.startTime = currentTime;
+                this.setDynamicProperties(key, blockState);
             }
-        } else if (blockState && isPowered === 0 && blockState.isPlaying) {
-            // Stop the sound when redstone power is turned off
-            this.stopSound(block, blockState.fileName);
-            blockState.isPlaying = false;
-            this.setDynamicProperties(key, blockState);
+        } else if (isPowered === 0) {
+            if (blockState.isPlaying) {
+                if (blockState.isBlockPulsed && elapsedTime < blockState.trackLength) {
+                    return;
+                }
+                this.stopSound(block, blockState.fileName);
+                blockState.isPlaying = false;
+                this.setDynamicProperties(key, blockState);
+            }
         }
     }
 }

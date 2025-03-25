@@ -1,10 +1,10 @@
-import { world } from "@minecraft/server";
+import { system } from "@minecraft/server";
 import { RecordBox } from "../blockComponets/on-player-interact-event";
 import { RedstoneComp } from "../blockComponets/on-tick-event";
 import { RecordBoxBreak } from "../blockComponets/on-player-destroy-event";
 
 function registry() {
-    world.beforeEvents.worldInitialize.subscribe((initEvent) => {
+    system.beforeEvents.startup.subscribe((initEvent) => {
         // Register custom components efficiently with a single method call
         const { blockComponentRegistry } = initEvent;
 

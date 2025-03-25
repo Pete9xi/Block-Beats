@@ -83,7 +83,7 @@ export class RedstoneComp {
      * @param fileName - The name of the sound file to stop.
      */
     private stopSound(block: Block, fileName: string): void {
-        block.dimension.runCommandAsync(`/stopsound @a ${fileName}`);
+        block.dimension.runCommand(`/stopsound @a ${fileName}`);
 
         if (debugEnabled) {
             console.log(`Block Beats [DEBUG]: Stopped sound at ${block.location.x},${block.location.y},${block.location.z}`);

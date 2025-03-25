@@ -2,8 +2,8 @@
 <div align="center">
   <img src="Media\blockbeats.png" alt="Block Beats">
   <br><br>
-  <p><b>Updated for Minecraft Bedrock 1.21.50</b><br>
-Block Beats now utilizes the 1.17.0-Beta server and 1.4.0-Beta server-ui APIs, enhancing compatibility and performance for Minecraft Bedrock.</p>
+  <p><b>Updated for Minecraft Bedrock 1.21.70</b><br>
+Block Beats now utilizes the 2..0-Beta server and 2.0.0-Beta server-ui APIs, enhancing compatibility and performance for Minecraft Bedrock.</p>
   <br><br>
 </div>
 <div>

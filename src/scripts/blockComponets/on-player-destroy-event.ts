@@ -1,4 +1,4 @@
-import { world, BlockComponentPlayerDestroyEvent } from "@minecraft/server";
+import { world, BlockComponentPlayerBreakEvent } from "@minecraft/server";
 import { debugEnabled } from "../debug/debug";
 
 /**
@@ -66,7 +66,7 @@ export class RecordBoxBreak {
     }
 
     constructor() {
-        this.onPlayerDestroy = this.onPlayerDestroy.bind(this);
+        this.onPlayerBreak = this.onPlayerBreak.bind(this);
     }
 
     /**
@@ -80,7 +80,7 @@ export class RecordBoxBreak {
      * recordBoxBreak.onPlayerDestroy(event);
      * ```
      */
-    onPlayerDestroy(event: BlockComponentPlayerDestroyEvent): void {
+    onPlayerBreak(event: BlockComponentPlayerBreakEvent): void {
         const { x, y, z } = event.block;
         const locationKey = RecordBoxBreak.getDynamicPropertyKey({ x, y, z });
 

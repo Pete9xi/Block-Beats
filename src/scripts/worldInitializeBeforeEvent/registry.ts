@@ -10,7 +10,7 @@ function registry() {
 
         blockComponentRegistry.registerCustomComponent("rb:on_interact", new RecordBox());
         blockComponentRegistry.registerCustomComponent("rb:onTick", new RedstoneComp());
-        blockComponentRegistry.registerCustomComponent("rb:onPlayerDestroy", new RecordBoxBreak());
+        blockComponentRegistry.registerCustomComponent("rb:onPlayerBreak", new RecordBoxBreak());
     });
 }
 

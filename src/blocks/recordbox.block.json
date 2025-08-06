@@ -1,5 +1,5 @@
 {
-    "format_version": "1.21.100",
+    "format_version": "1.21.50",
     "minecraft:block": {
         "description": {
             "identifier": "rb:recordbox",
@@ -30,9 +30,8 @@
                 }
             },
             "minecraft:map_color": "#7d7d7d",
-            "rb:on_interact": {},
-            "rb:onTick": {},
-            "rb:onPlayerBreak": {},
+            "minecraft:custom_components": ["rb:on_interact", "rb:onTick", "rb:onPlayerBreak"], // Adds our custom on_interact component
+
             "minecraft:redstone_conductivity": {
                 "redstone_conductor": true,
                 "allows_wire_to_step_down": true

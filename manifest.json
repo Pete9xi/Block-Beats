@@ -4,8 +4,8 @@
         "name": "Block Beats",
         "description": "Block Beats is an innovative Minecraft Bedrock Edition mod that enables players to bring custom audio into their worlds using redstone mechanics.",
         "uuid": "b1c75210-ad13-4f60-afc4-3fd52360bf5c",
-        "version": [2, 1, 0],
-        "min_engine_version": [1, 21, 90]
+        "version": [2, 2, 0],
+        "min_engine_version": [1, 21, 100]
     },
     "metadata": {
         "authors": ["Pete9xi"],
@@ -34,11 +34,11 @@
         },
         {
             "module_name": "@minecraft/server",
-            "version": "2.1.0-beta"
+            "version": "2.3.0-beta"
         },
         {
             "module_name": "@minecraft/server-ui",
-            "version": "2.1.0-beta"
+            "version": "2.3.0-beta"
         }
     ],
     "capabilities": ["script_eval"]

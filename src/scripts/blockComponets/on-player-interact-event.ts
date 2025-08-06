@@ -68,9 +68,9 @@ export class RecordBox {
 
         const configUI = new ModalFormData()
             .title("§9Block Beats - Block Config")
-            .textField("FileName", fileName, fileName)
+            .textField("FileName", fileName, { defaultValue: fileName })
             .textField("Track Length", RecordBox.reverseParseTrackLength(trackLength), { defaultValue: RecordBox.reverseParseTrackLength(trackLength) })
-            .toggle("Loop?", isLooping)
+            .toggle("Loop?", { defaultValue: isLooping })
             .slider("Pitch", 0.1, 2.0, {
                 valueStep: 0.1,
                 defaultValue: pitch,
@@ -80,7 +80,7 @@ export class RecordBox {
                 valueStep: 50.0,
                 defaultValue: volume,
             })
-            .toggle("Enable Play when Pulsed?", isBlockPulsed);
+            .toggle("Enable Play when Pulsed?", { defaultValue: isBlockPulsed });
 
         try {
             const formData: ModalFormResponse = await configUI.show(player);

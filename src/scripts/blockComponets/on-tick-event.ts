@@ -102,6 +102,8 @@ export class RedstoneComp {
         const currentTime = Date.now();
 
         let blockState = this.getDynamicProperties(`${key}`);
+        //Guard clause to prevent errors if data is missing
+        if (!blockState) return;
 
         const elapsedTime = (currentTime - blockState.startTime) / 1000;
 

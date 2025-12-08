@@ -1,127 +1,92 @@
-import { world, BlockComponentTickEvent, Block } from "@minecraft/server";
-import { debugEnabled } from "../debug/debug";
-
 /**
- * Handles redstone-triggered sound components efficiently using persistent storage.
- */
+
+* Handles redstone-triggered sound components using persistent storage.
+* Uses block string keys for DB lookup instead of numeric keys.
+  */
+import { BlockComponentTickEvent, Block } from "@minecraft/server";
+import { blockBeatsDB } from "../event-listeners/world-initialize";
+import debug from "../debug/debug";
+
 export class RedstoneComp {
     constructor() {
         this.onTick = this.onTick.bind(this);
     }
 
     /**
-     * Generates a unique numeric key for a block based on its coordinates.
-     * Floats are truncated to integers to align with Minecraft block positioning.
+     * Generates a unique string key for a block based on its coordinates.
      *
-     * @param x - X coordinate of the block.
-     * @param y - Y coordinate of the block.
-     * @param z - Z coordinate of the block.
-     * @returns A unique numeric key for the block.
+     * @param x - X coordinate.
+     * @param y - Y coordinate.
+     * @param z - Z coordinate.
+     * @returns String key for database lookup.
      */
-    private generateKey(x: number, y: number, z: number): number {
-        const intX = Math.floor(x);
-        const intY = Math.floor(y);
-        const intZ = Math.floor(z);
-
-        return intX * 1e8 + intY * 1e4 + intZ;
+    private getBlockKey(x: number, y: number, z: number): string {
+        return `bbData${x}|${y}|${z}`;
     }
 
-    /**
-     * Retrieves dynamic properties for a block based on its key.
-     *
-     * @param key - The unique key of the block.
-     * @returns The dynamic properties of the block or `null` if properties are missing.
-     */
-    private getDynamicProperties(key: string): { fileName: string; trackLength: number; pitch: number; volume: number; isPlaying: boolean; startTime: number; isLooping: boolean; isBlockPulsed: boolean } | null {
-        const bbData = world.getDynamicProperty(`bbData${key}`) as string; // Read redstone data from a specific key
-
-        if (!bbData) return null;
-
+    private async getBlockState(key: string) {
         try {
-            const data = JSON.parse(bbData);
-            return data;
-        } catch (error) {
-            console.error("Error parsing bbData:", error);
+            const state = await blockBeatsDB.get(key);
+            if (debug.getBlockState) console.log(`[DEBUG] Retrieved block state for key ${key}:`, state);
+            return state ?? null;
+        } catch (err) {
+            console.error(`[ERROR] Failed to get block state for key ${key}:`, err);
             return null;
         }
     }
 
-    /**
-     * Saves dynamic properties for a block based on its key.
-     *
-     * @param key - The unique key of the block.
-     * @param data - The data to save.
-     */
-    private setDynamicProperties(key: string, data: object): void {
+    private async setBlockState(key: string, data: any) {
         try {
-            world.setDynamicProperty(`bbData${key}`, JSON.stringify(data));
-        } catch (error) {
-            console.error("Error saving bbData:", error);
+            await blockBeatsDB.set(key, data);
+            if (debug.setBlockState) console.log(`[DEBUG] Saved block state for key ${key}:`, data);
+        } catch (err) {
+            console.error(`[ERROR] Failed to set block state for key ${key}:`, err);
         }
     }
 
-    /**
-     * Plays a sound at the specified block location.
-     *
-     * @param block - The block object.
-     * @param fileName - The name of the sound file.
-     * @param pitch - The pitch of the sound.
-     * @param volume - The volume of the sound.
-     */
-    private playSound(block: Block, fileName: string, pitch: number, volume: number): void {
+    private playSound(block: Block, fileName: string, pitch: number, volume: number) {
         block.dimension.playSound(fileName, block.location, { pitch, volume });
-
-        if (debugEnabled) {
-            console.log(`Block Beats [DEBUG]: Playing ${fileName} at ${block.location.x},${block.location.y},${block.location.z}`);
-        }
+        if (debug.playSound) console.log(`[DEBUG] Playing '${fileName}' at ${block.location.x},${block.location.y},${block.location.z}`);
     }
 
-    /**
-     * Stops the sound playing at the specified block location.
-     *
-     * @param block - The block object.
-     * @param fileName - The name of the sound file to stop.
-     */
-    private stopSound(block: Block, fileName: string): void {
+    private stopSound(block: Block, fileName: string) {
         block.dimension.runCommand(`/stopsound @a ${fileName}`);
-
-        if (debugEnabled) {
-            console.log(`Block Beats [DEBUG]: Stopped sound at ${block.location.x},${block.location.y},${block.location.z}`);
-        }
+        if (debug.stopSound) console.log(`[DEBUG] Stopped '${fileName}' at ${block.location.x},${block.location.y},${block.location.z}`);
     }
 
     /**
-     * Handles the tick event for redstone components.
+     * Handles the redstone tick for a block.
      *
-     * @param e - The BlockComponentTickEvent object.
+     * @param e - The tick event.
      */
-    onTick(e: BlockComponentTickEvent): void {
+    async onTick(e: BlockComponentTickEvent): Promise<void> {
         const block = e.block;
-        const key = this.generateKey(block.location.x, block.location.y, block.location.z).toString();
+        const key = this.getBlockKey(block.location.x, block.location.y, block.location.z);
         const isPowered = block.getRedstonePower();
         const currentTime = Date.now();
 
-        let blockState = this.getDynamicProperties(`${key}`);
-        //Guard clause to prevent errors if data is missing
-        if (!blockState) return;
+        if (debug.tickKey) console.log(`[DEBUG] Tick for key ${key} - Power: ${isPowered}`);
+
+        const blockState = await this.getBlockState(key);
+        if (!blockState) {
+            if (debug.currentBlockState) console.log(`[DEBUG] No block state for key ${key}, skipping tick.`);
+            return;
+        }
 
         const elapsedTime = (currentTime - blockState.startTime) / 1000;
-
         if (isPowered > 0) {
             if (!blockState.isPlaying || (elapsedTime >= blockState.trackLength && blockState.isLooping)) {
                 this.playSound(block, blockState.fileName, blockState.pitch, blockState.volume);
                 blockState.isPlaying = true;
                 blockState.startTime = currentTime;
-                this.setDynamicProperties(key, blockState);
+                await this.setBlockState(key, blockState);
             }
         } else if (isPowered === 0) {
             if (blockState.isPlaying) {
-                if (blockState.isBlockPulsed && elapsedTime < blockState.trackLength) {
-                    return;
-                }
+                if (blockState.isBlockPulsed && elapsedTime < blockState.trackLength) return;
                 this.stopSound(block, blockState.fileName);
                 blockState.isPlaying = false;
-                this.setDynamicProperties(key, blockState);
+                await this.setBlockState(key, blockState);
             }
         }
     }

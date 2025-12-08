@@ -1,92 +1,69 @@
-import { world, BlockComponentPlayerBreakEvent } from "@minecraft/server";
-import { debugEnabled } from "../debug/debug";
-
 /**
- * Handles the removal of dynamic properties associated with a record box when destroyed by a player.
- */
+
+* Handles the removal of block configuration data when a player destroys a record box.
+* Uses string-based keys for consistency with the rest of the Block Beats system.
+  */
+import { BlockComponentPlayerBreakEvent } from "@minecraft/server";
+import debug from "../debug/debug";
+import { blockBeatsDB } from "../event-listeners/world-initialize";
+
 export class RecordBoxBreak {
     /**
-     * Generates a unique numeric key for the block's location using its coordinates.
-     * The logic truncates coordinates to integers to ensure consistent key generation.
+     * Generates the string key for a block based on its coordinates.
      *
-     * @param location - The x, y, and z coordinates of the block.
-     * @returns A unique numeric key for the block.
+     * @param location - The block's x, y, and z coordinates.
+     * @returns The string key for the database.
      * @example
-     * ```typescript
-     * const locationKey = RecordBoxBreak.generateKey({ x: 10, y: 64, z: 20 });
-     * console.log(locationKey); // 100640200
-     * ```
+     * const dbKey = RecordBoxBreak.getDatabaseKey({ x: 10, y: 64, z: 20 });
+     * console.log(dbKey); // "bbData10|64|20"
      */
-    private static generateKey(location: { x: number; y: number; z: number }): number {
-        // Truncate the coordinates to integers to generate a consistent key
-        const intX = Math.floor(location.x);
-        const intY = Math.floor(location.y);
-        const intZ = Math.floor(location.z);
-
-        return intX * 1e8 + intY * 1e4 + intZ;
+    private static getDatabaseKey(location: { x: number; y: number; z: number }): string {
+        return `bbData${location.x}|${location.y}|${location.z}`;
     }
 
     /**
-     * Generates a unique key for dynamic property retrieval based on the block's location.
-     * This key is used to associate dynamic properties with the block in the Minecraft world.
+     * Deletes the block configuration data from the database.
      *
-     * @param location - The x, y, and z coordinates of the block.
-     * @returns A string representing the unique key for the block's dynamic properties.
+     * @param location - The block's x, y, and z coordinates.
+     * @returns A promise that resolves once the block data has been removed.
      * @example
-     * ```typescript
-     * const locationKey = RecordBoxBreak.getDynamicPropertyKey({ x: 10, y: 64, z: 20 });
-     * console.log(locationKey); // "100640200"
-     * ```
+     * await RecordBoxBreak.deleteBlockData({ x: 10, y: 64, z: 20 });
      */
-    private static getDynamicPropertyKey(location: { x: number; y: number; z: number }): string {
-        const key = RecordBoxBreak.generateKey(location);
-        return key.toString(); // Return the key as a string for property access
-    }
+    private static async deleteBlockData(location: { x: number; y: number; z: number }): Promise<void> {
+        const dbKey = RecordBoxBreak.getDatabaseKey(location);
 
-    /**
-     * Deletes the dynamic properties associated with the block at the given location.
-     *
-     * @param location - The x, y, and z coordinates of the block.
-     * @example
-     * ```typescript
-     * RecordBoxBreak.deleteDynamicProperties({ x: 10, y: 64, z: 20 });
-     * ```
-     */
-    private static deleteDynamicProperties(location: { x: number; y: number; z: number }): void {
-        const locationKey = RecordBoxBreak.getDynamicPropertyKey(location);
+        // Check if the block exists before deleting
+        const exists = await blockBeatsDB.get(dbKey);
+        if (!exists) return;
 
-        if (debugEnabled) {
-            console.log(`Block Beats [DEBUG]: Deleting DynamicProperty bbData${locationKey}`);
-            console.log(`Block Beats [DEBUG]: Deleting DynamicProperty bbLock${locationKey}`);
+        await blockBeatsDB.delete(dbKey);
+
+        if (debug.deleteBlockData) {
+            console.log(`Block Beats [DEBUG]: Deleted block data ${dbKey}`);
         }
-
-        // Remove the serialized data and lock properties
-        world.setDynamicProperty(`bbData${locationKey}`, undefined);
-        world.setDynamicProperty(`bbLock${locationKey}`, undefined);
     }
 
+    /**
+     * Constructor for RecordBoxBreak.
+     * Binds the `onPlayerBreak` method to the current instance.
+     */
     constructor() {
         this.onPlayerBreak = this.onPlayerBreak.bind(this);
     }
 
     /**
-     * Event handler triggered when a player destroys a block (e.g., a record box).
-     * This method will remove the dynamic properties associated with the destroyed block.
+     * Event handler triggered when a player destroys a block.
+     * Deletes the associated block data from the database.
      *
-     * @param event - The event triggered when a block is destroyed by a player.
+     * @param event - The player break event object.
+     * @returns A promise that resolves once deletion is complete.
      * @example
-     * ```typescript
-     * const event = // Example event from a player destroying a block
-     * recordBoxBreak.onPlayerDestroy(event);
-     * ```
+     * world.afterEvents.blockBreak.subscribe((e) => {
+     *   recordBoxBreak.onPlayerBreak(e);
+     * });
      */
-    onPlayerBreak(event: BlockComponentPlayerBreakEvent): void {
+    async onPlayerBreak(event: BlockComponentPlayerBreakEvent): Promise<void> {
         const { x, y, z } = event.block;
-        const locationKey = RecordBoxBreak.getDynamicPropertyKey({ x, y, z });
-
-        // Check if the block data exists before attempting to delete it
-        if (world.getDynamicProperty(`bbData${locationKey}`) !== undefined || world.getDynamicProperty(`bbLock${locationKey}`) !== undefined) {
-            RecordBoxBreak.deleteDynamicProperties({ x, y, z });
-        }
+        await RecordBoxBreak.deleteBlockData({ x, y, z });
     }
 }

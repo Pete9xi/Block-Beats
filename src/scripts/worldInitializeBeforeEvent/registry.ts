@@ -2,6 +2,8 @@ import { system } from "@minecraft/server";
 import { RecordBox } from "../blockComponets/on-player-interact-event";
 import { RedstoneComp } from "../blockComponets/on-tick-event";
 import { RecordBoxBreak } from "../blockComponets/on-player-destroy-event";
+import { OptimizedDatabase } from "../data/data-hive";
+import { BlockBeatsDBSchema } from "../data/db-types";
 
 function registry() {
     system.beforeEvents.startup.subscribe((initEvent) => {
@@ -15,3 +17,4 @@ function registry() {
 }
 
 export { registry };
+export const blockBeatsDB = new OptimizedDatabase<BlockBeatsDBSchema>("blockBeatsDB");

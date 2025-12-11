@@ -72,7 +72,7 @@ export class RecordBox {
 
             await blockBeatsDB.set(blockKey, blockData);
 
-            if (debug.saveConfig) console.log(`Block Beats [DEBUG]: Saved config for key ${blockKey}:`, blockData);
+            if (debug.debugMode && debug.saveConfig) console.log(`Block Beats [DEBUG]: Saved config for key ${blockKey}:`, blockData);
         } catch (error) {
             console.error("Block Beats Unhandled Rejection: ", error);
         }

@@ -1,5 +1,6 @@
 export default {
     /** Indicates whether debug mode is enabled. for certian events */
+    debugMode: false, // Enable debug logs to the console when true.
     getKey: false,
     setKey: false,
     setBlockState: false,

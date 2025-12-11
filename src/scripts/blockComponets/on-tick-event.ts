@@ -27,7 +27,7 @@ export class RedstoneComp {
     private async getBlockState(key: string) {
         try {
             const state = await blockBeatsDB.get(key);
-            if (debug.getBlockState) console.log(`[DEBUG] Retrieved block state for key ${key}:`, state);
+            if (debug.debugMode && debug.getBlockState) console.log(`[DEBUG] Retrieved block state for key ${key}:`, state);
             return state ?? null;
         } catch (err) {
             console.error(`[ERROR] Failed to get block state for key ${key}:`, err);
@@ -38,7 +38,7 @@ export class RedstoneComp {
     private async setBlockState(key: string, data: any) {
         try {
             await blockBeatsDB.set(key, data);
-            if (debug.setBlockState) console.log(`[DEBUG] Saved block state for key ${key}:`, data);
+            if (debug.debugMode && debug.setBlockState) console.log(`[DEBUG] Saved block state for key ${key}:`, data);
         } catch (err) {
             console.error(`[ERROR] Failed to set block state for key ${key}:`, err);
         }
@@ -46,12 +46,12 @@ export class RedstoneComp {
 
     private playSound(block: Block, fileName: string, pitch: number, volume: number) {
         block.dimension.playSound(fileName, block.location, { pitch, volume });
-        if (debug.playSound) console.log(`[DEBUG] Playing '${fileName}' at ${block.location.x},${block.location.y},${block.location.z}`);
+        if (debug.debugMode && debug.playSound) console.log(`[DEBUG] Playing '${fileName}' at ${block.location.x},${block.location.y},${block.location.z}`);
     }
 
     private stopSound(block: Block, fileName: string) {
         block.dimension.runCommand(`/stopsound @a ${fileName}`);
-        if (debug.stopSound) console.log(`[DEBUG] Stopped '${fileName}' at ${block.location.x},${block.location.y},${block.location.z}`);
+        if (debug.debugMode && debug.stopSound) console.log(`[DEBUG] Stopped '${fileName}' at ${block.location.x},${block.location.y},${block.location.z}`);
     }
 
     /**
@@ -65,11 +65,11 @@ export class RedstoneComp {
         const isPowered = block.getRedstonePower();
         const currentTime = Date.now();
 
-        if (debug.tickKey) console.log(`[DEBUG] Tick for key ${key} - Power: ${isPowered}`);
+        if (debug.debugMode && debug.tickKey) console.log(`[DEBUG] Tick for key ${key} - Power: ${isPowered}`);
 
         const blockState = await this.getBlockState(key);
         if (!blockState) {
-            if (debug.currentBlockState) console.log(`[DEBUG] No block state for key ${key}, skipping tick.`);
+            if (debug.debugMode && debug.currentBlockState) console.log(`[DEBUG] No block state for key ${key}, skipping tick.`);
             return;
         }
 

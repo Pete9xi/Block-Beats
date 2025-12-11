@@ -38,7 +38,7 @@ export class RecordBoxBreak {
 
         await blockBeatsDB.delete(dbKey);
 
-        if (debug.deleteBlockData) {
+        if (debug.debugMode && debug.deleteBlockData) {
             console.log(`Block Beats [DEBUG]: Deleted block data ${dbKey}`);
         }
     }

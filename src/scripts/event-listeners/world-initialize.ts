@@ -7,10 +7,7 @@ async function initializeSystems() {
     // Instantiate Databases
     blockBeatsDB = new OptimizedDatabase("blockBeatsDB");
 }
-/**
- * Subscribes to the world load event.
- * Sets up paradoxModules and handles lockdown when the world initializes.
- */
+
 export function subscribeToWorldInitialize() {
     world.afterEvents.worldLoad.subscribe(async () => {
         await initializeSystems();

@@ -50,7 +50,7 @@ export class RedstoneComp {
     }
 
     private stopSound(block: Block, fileName: string) {
-        block.dimension.runCommand(`/stopsound @a ${fileName}`);
+        block.dimension.stopSound(fileName);
         if (debug.debugMode && debug.stopSound) console.log(`[DEBUG] Stopped '${fileName}' at ${block.location.x},${block.location.y},${block.location.z}`);
     }
 

@@ -1,11 +1,10 @@
 {
-    "format_version": "1.21.50",
+    "format_version": "1.21.90",
     "minecraft:block": {
         "description": {
             "identifier": "rb:recordbox",
             "menu_category": {
-                "category": "items",
-                "group": "itemGroup.name.record"
+                "category": "items"
             },
             "traits": {
                 "minecraft:placement_direction": {
@@ -30,8 +29,10 @@
                 }
             },
             "minecraft:map_color": "#7d7d7d",
-            "minecraft:custom_components": ["rb:on_interact", "rb:onTick", "rb:onPlayerBreak"], // Adds our custom on_interact component
-
+            //"minecraft:custom_components": ["rb:on_interact", "rb:onTick", "rb:onPlayerBreak"], // Adds our custom on_interact component
+            "rb:on_interact": {},
+            "rb:onTick": {},
+            "rb:onPlayerBreak": {},
             "minecraft:redstone_conductivity": {
                 "redstone_conductor": true,
                 "allows_wire_to_step_down": true

@@ -11,3 +11,5 @@ Block Beats has a few options that can be configured, these are:
 - Pitch: This allows you to pitch up or down the audio file
 - Audio Load Distance: This value adjust how far away from the block that the audio file is loaded for the player to hear when they come into range. 
 - Enable Play When Pulsed: This toggle when enabled will allow the block to play the audio file if it gets a pulse of redstone from a pressure plate or a button etc. 
+- Remote Playback: When enabled the block will play the location defined in the Remote Playback Location text field.
+- Remote Playback Location: used when Remote Sound is set to true, enter the location where the sound needs to be played. This can be entered as `100,64,0` or `100 64 0`

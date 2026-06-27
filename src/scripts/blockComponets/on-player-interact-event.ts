@@ -69,8 +69,8 @@ export class RecordBox {
             .slider("Pitch", 0.1, 2.0, { valueStep: 0.1, defaultValue: pitch })
             .slider("Audio Load Distance", 0.01, 100.0, { valueStep: 50.0, defaultValue: volume })
             .toggle("Enable Play when Pulsed?", { defaultValue: isBlockPulsed })
-            .toggle("Remote Sound?", { defaultValue: isRemote })
-            .textField("Remote Location (x,y,z) or (x y z) ", RecordBox.vector3ToString(remoteLocation), { defaultValue: RecordBox.vector3ToString(remoteLocation) });
+            .toggle("Remote playback", { defaultValue: isRemote })
+            .textField("Remote Playback Location (x,y,z) or (x y z) ", RecordBox.vector3ToString(remoteLocation), { defaultValue: RecordBox.vector3ToString(remoteLocation) });
 
         try {
             const formData: ModalFormResponse = await configUI.show(player);

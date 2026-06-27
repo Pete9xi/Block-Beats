@@ -1,3 +1,5 @@
+import { Vector3 } from "@minecraft/server";
+
 /**
  * Schema for storing Block Beats audio block data in the persistent database.
  *
@@ -18,6 +20,9 @@
  *   startTime: 0,
  *   isLooping: false,
  *   isBlockPulsed: false
+ *   isLocked: false,
+ *   isRemote: false,
+ *   remoteLocation: new Vector3(100, 64, 200)
  * });
  */
 export type BlockBeatsDBSchema = {
@@ -83,5 +88,15 @@ export type BlockBeatsDBSchema = {
          * If true, the UI will not be shown, the block configuration can not be changed. and the sound is triggered.
          */
         isLocked?: boolean;
+        /**
+         * Whether the block is remote, meaning the sound should be played at a different location than the block's position.
+         * If true, the sound will be played at the specified remote location instead of the block's location.
+         */
+        isRemote?: boolean;
+        /**
+         * The remote location where the sound should be played if the block is remote.
+         * This is required if `isRemote` is true. It should be a Vector3 object representing the coordinates of the remote location.
+         */
+        remoteLocation?: Vector3 | null;
     };
 };

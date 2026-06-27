@@ -2,7 +2,7 @@
 
 * Manages Block Beats configuration and interaction events.
   */
-import { BlockComponentPlayerInteractEvent, EntityEquippableComponent, EquipmentSlot, ItemStack, Player } from "@minecraft/server";
+import { BlockComponentPlayerInteractEvent, EntityEquippableComponent, EquipmentSlot, ItemStack, Player, Vector3 } from "@minecraft/server";
 import { ModalFormData, ModalFormResponse } from "@minecraft/server-ui";
 import debug from "../debug/debug";
 import { blockBeatsDB } from "../event-listeners/world-initialize";
@@ -32,6 +32,24 @@ export class RecordBox {
         const remainingSeconds = Math.floor(seconds % 60);
         return remainingSeconds === 0 ? `${minutes}.00` : `${minutes}.${remainingSeconds.toString().padStart(2, "0")}`;
     }
+    private static parseVector3(input: string): Vector3 | null {
+        if (!input) return null;
+
+        // Support both "x y z" and "x,y,z"
+        const parts = input.includes(",") ? input.split(",") : input.split(" ");
+
+        if (parts.length !== 3) return null;
+
+        const [x, y, z] = parts.map((n) => Number(n));
+
+        if ([x, y, z].some(isNaN)) return null;
+
+        return { x, y, z };
+    }
+    private static vector3ToString(vec: Vector3 | null | undefined): string {
+        if (!vec) return "";
+        return `${vec.x},${vec.y},${vec.z}`;
+    }
 
     /**
      * Displays a configuration UI for a block.
@@ -41,7 +59,7 @@ export class RecordBox {
      * @param defaultValues - Default values to populate the form.
      */
     private static async showConfigUI(player: Player, blockKey: string, defaultValues: any = {}): Promise<void> {
-        const { fileName = "", trackLength = "", isLooping = false, pitch = 1.0, volume = 50.0, isBlockPulsed = false } = defaultValues;
+        const { fileName = "", trackLength = "", isLooping = false, pitch = 1.0, volume = 50.0, isBlockPulsed = false, isRemote = false, remoteLocation = "" } = defaultValues;
 
         const configUI = new ModalFormData()
             .title("§9Block Beats - Block Config")
@@ -50,12 +68,14 @@ export class RecordBox {
             .toggle("Loop?", { defaultValue: isLooping })
             .slider("Pitch", 0.1, 2.0, { valueStep: 0.1, defaultValue: pitch })
             .slider("Audio Load Distance", 0.01, 100.0, { valueStep: 50.0, defaultValue: volume })
-            .toggle("Enable Play when Pulsed?", { defaultValue: isBlockPulsed });
+            .toggle("Enable Play when Pulsed?", { defaultValue: isBlockPulsed })
+            .toggle("Remote Sound?", { defaultValue: isRemote })
+            .textField("Remote Location (x,y,z) or (x y z) ", RecordBox.vector3ToString(remoteLocation), { defaultValue: RecordBox.vector3ToString(remoteLocation) });
 
         try {
             const formData: ModalFormResponse = await configUI.show(player);
             if (formData.cancelationReason === "UserClosed") return;
-            const [newFileName, newTrackLength, newIsLooping, newPitch, newVolume, newisBlockPulsed] = formData.formValues;
+            const [newFileName, newTrackLength, newIsLooping, newPitch, newVolume, newisBlockPulsed, newIsRemote, newRemoteLocation] = formData.formValues;
 
             const trackLengthInSeconds = RecordBox.parseTrackLength(parseFloat(newTrackLength as string));
 
@@ -68,6 +88,8 @@ export class RecordBox {
                 isPlaying: false,
                 startTime: 0,
                 isBlockPulsed: Boolean(newisBlockPulsed),
+                isRemote: Boolean(newIsRemote),
+                remoteLocation: RecordBox.parseVector3(newRemoteLocation as string),
             };
 
             await blockBeatsDB.set(blockKey, blockData);

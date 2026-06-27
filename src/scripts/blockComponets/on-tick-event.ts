@@ -3,7 +3,7 @@
 * Handles redstone-triggered sound components using persistent storage.
 * Uses block string keys for DB lookup instead of numeric keys.
   */
-import { BlockComponentTickEvent, Block } from "@minecraft/server";
+import { BlockComponentTickEvent, Block, Vector3 } from "@minecraft/server";
 import { blockBeatsDB } from "../event-listeners/world-initialize";
 import debug from "../debug/debug";
 
@@ -44,12 +44,22 @@ export class RedstoneComp {
         }
     }
 
-    private playSound(block: Block, fileName: string, pitch: number, volume: number) {
+    private playSound(block: Block, fileName: string, pitch: number, volume: number, remote: boolean, remoteLocation: Vector3) {
+        if (remote) {
+            block.dimension.playSound(fileName, remoteLocation, { pitch, volume });
+            if (debug.debugMode && debug.playSound) console.log(`[DEBUG] Playing '${fileName}' at ${remoteLocation.x},${remoteLocation.y},${remoteLocation.z}`);
+            return;
+        }
         block.dimension.playSound(fileName, block.location, { pitch, volume });
         if (debug.debugMode && debug.playSound) console.log(`[DEBUG] Playing '${fileName}' at ${block.location.x},${block.location.y},${block.location.z}`);
     }
 
-    private stopSound(block: Block, fileName: string) {
+    private stopSound(block: Block, fileName: string, remote: boolean, remoteLocation: Vector3) {
+        if (remote) {
+            block.dimension.stopSound(fileName);
+            if (debug.debugMode && debug.stopSound) console.log(`[DEBUG] Stopped '${fileName}' at ${remoteLocation.x},${remoteLocation.y},${remoteLocation.z}`);
+            return;
+        }
         block.dimension.stopSound(fileName);
         if (debug.debugMode && debug.stopSound) console.log(`[DEBUG] Stopped '${fileName}' at ${block.location.x},${block.location.y},${block.location.z}`);
     }
@@ -76,7 +86,7 @@ export class RedstoneComp {
         const elapsedTime = (currentTime - blockState.startTime) / 1000;
         if (isPowered > 0) {
             if (!blockState.isPlaying || (elapsedTime >= blockState.trackLength && blockState.isLooping)) {
-                this.playSound(block, blockState.fileName, blockState.pitch, blockState.volume);
+                this.playSound(block, blockState.fileName, blockState.pitch, blockState.volume, blockState.isRemote, blockState.remoteLocation);
                 blockState.isPlaying = true;
                 blockState.startTime = currentTime;
                 await this.setBlockState(key, blockState);
@@ -84,7 +94,7 @@ export class RedstoneComp {
         } else if (isPowered === 0) {
             if (blockState.isPlaying) {
                 if (blockState.isBlockPulsed && elapsedTime < blockState.trackLength) return;
-                this.stopSound(block, blockState.fileName);
+                this.stopSound(block, blockState.fileName, blockState.isRemote, blockState.remoteLocation);
                 blockState.isPlaying = false;
                 await this.setBlockState(key, blockState);
             }

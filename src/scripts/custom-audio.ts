@@ -1,3 +1,4 @@
+import { blockBeatsVersion } from "./data/version.js";
 import debug from "./debug/debug.js";
 import { registry } from "./event-listeners/registry.js";
 import { subscribeToWorldInitialize } from "./event-listeners/world-initialize.js";
@@ -7,3 +8,4 @@ debug.debugMode && debug.registerBlocks && console.log("Block Beats [DEBUG]: Cal
 
 registry();
 subscribeToWorldInitialize();
+console.log(`Block Beats: Initialized successfully. \n Debug mode is ${debug.debugMode ? "ON" : "OFF"}.\n Version: ${blockBeatsVersion}`);

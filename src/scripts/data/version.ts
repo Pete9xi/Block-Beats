@@ -1,1 +1,1 @@
-export const blockBeatsVersion = "v3.0.2";
+export const blockBeatsVersion = "v3.3.0";
